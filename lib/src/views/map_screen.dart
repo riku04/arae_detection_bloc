@@ -5,34 +5,40 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:latlong/latlong.dart';
 
-class MapScreen extends StatelessWidget{
+class MapScreen extends StatefulWidget{
+  @override
+  _MapScreenState createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen>{
+  MapController _mapController;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _mapController = MapController();
+  }
+
   @override
   build(BuildContext context){
     final blocMap = BlocProvider.of<MapBloc>(context);
-    final _mapController = MapController();
 
-    blocMap.initMap();
+    blocMap.initLayers();
+    blocMap.initMapOptions();
 
     return Scaffold(
       body: Container(
         child: StreamBuilder<MapOptions>(
           stream: blocMap.onInitOptions,
           builder: (context, optionsSnapshot){
-            return StreamBuilder<List<Marker>>(
-             stream: blocMap.onAddMarker,
-             builder: (context, markersSnapshot){
+            return StreamBuilder<List<LayerOptions>>(
+             stream: blocMap.onLayersChanged,
+             builder: (context, layersSnapshot){
                return FlutterMap(
                  options: optionsSnapshot.data,
                  mapController: _mapController,
-                 layers: [
-                   TileLayerOptions(
-                       urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                       subdomains: ['a', 'b', 'c']
-                   ),
-                   MarkerLayerOptions(
-                     markers: markersSnapshot.data ,
-                   )
-                 ],
+                 layers: layersSnapshot.data,
                );
              },
             );
@@ -43,7 +49,7 @@ class MapScreen extends StatelessWidget{
           backgroundColor: Colors.redAccent,
           label: Text("add"),
           onPressed: () {
-            blocMap.addPoint.add(new LatLng(35.691075, 139.767828));
+            blocMap.addPoint.add(_mapController.center);
           }
       ),
     );
