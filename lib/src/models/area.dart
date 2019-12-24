@@ -2,18 +2,18 @@ import 'package:flutter/cupertino.dart';
 import 'package:latlong/latlong.dart';
 
 class Area {
-  String areaPoints;
+  String areaPointsStr;
 
   Area({
-    @required this.areaPoints
+    @required this.areaPointsStr
   });
 
   Area.toJson(Map<String,dynamic> json)
-    :areaPoints = json['points'];
+    :areaPointsStr = json['points'];
 
   Map<String,dynamic> toJson() =>
       {
-        'points': areaPoints,
+        'points': areaPointsStr,
       };
 
   static String pointsToString(List<LatLng> points){

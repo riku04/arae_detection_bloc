@@ -6,8 +6,6 @@ import 'package:flutter_map_app/src/database/area_database_provider.dart';
 import 'package:flutter_map_app/src/models/area.dart';
 import 'package:latlong/latlong.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
-
 
 class AreaRepository{
   Future<int> addPoints(String areaName, Area area) async{ //areaNameのテーブルにポリゴンの頂点座標を追加する

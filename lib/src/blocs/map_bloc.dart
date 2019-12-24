@@ -16,7 +16,7 @@ class MapBloc extends Bloc{
   List<Polygon> _expandedPolygons;  //接近領域
   List<Polygon> _moreExpandedPolygons;  //準接近領域
 
-  List<LayerOptions> layers;
+  List<LayerOptions> layers; //画面更新はこの変数をStreamに流すことで行う
   TileLayerOptions _tileLayer;  //地図タイルのレイヤ
   MarkerLayerOptions _draftMarkerLayer; //下書きマーカーのレイヤ
   PolygonLayerOptions _draftPolygonLayer; //下書きポリゴンのレイヤ
@@ -95,7 +95,9 @@ class MapBloc extends Bloc{
   }
 
   void createPolygon(){
-    if(_draftPolygons.isEmpty){return;}
+    if(_draftPolygons.isEmpty){
+      return;
+    }
     Polygon polygon = _draftPolygons[0];
     _polygons.add(new Polygon(
       points: polygon.points,
@@ -110,8 +112,7 @@ class MapBloc extends Bloc{
     _draftPolygons.clear();
 
     Area area = Area();
-    area.areaPoints = Area.pointsToString(polygon.points);
-
+    area.areaPointsStr = Area.pointsToString(polygon.points);
     AreaRepository().addPoints("area0", area);  //tableName,Area
   }
 
@@ -120,7 +121,6 @@ class MapBloc extends Bloc{
     areaList = await AreaRepository().getAreaList("area0");
 
     _polygons.clear();
-
     areaList.forEach((points){
       Polygon polygon = new Polygon(
           points: points,
@@ -170,11 +170,8 @@ class MapBloc extends Bloc{
   }
   @override
   void dispose() {
-    // TODO: implement dispose
     _optionsController.close();
     _addPointController.close();
-//    _markersController.close();
-//    _detectionController.close();
   }
 
 }
