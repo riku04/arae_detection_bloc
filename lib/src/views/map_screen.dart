@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
-import 'package:latlong/latlong.dart';
+import 'package:flutter_map_app/src/repository/area_repository.dart';
+
 
 class MapScreen extends StatefulWidget{
   @override
@@ -45,13 +48,39 @@ class _MapScreenState extends State<MapScreen>{
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-          backgroundColor: Colors.redAccent,
-          label: Text("add"),
-          onPressed: () {
-            blocMap.addPoint.add(_mapController.center);
-          }
-      ),
+      floatingActionButton: Row(
+        verticalDirection: VerticalDirection.up,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          FloatingActionButton.extended(
+              backgroundColor: Colors.redAccent,
+              label: Text("add"),
+              onPressed: () {
+                blocMap.addPoint.add(_mapController.center);
+              }
+          ),
+          Container(
+            margin: EdgeInsets.only(bottom: 16.0),
+            child: FloatingActionButton.extended(
+                backgroundColor: Colors.yellowAccent,
+                label: Text("ok"),
+                onPressed: (){
+                  blocMap.createPolygon();
+                },
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(bottom: 16.0),
+            child: FloatingActionButton.extended(
+              backgroundColor: Colors.blueAccent,
+              label: Text("inside?"),
+              onPressed: (){
+                AreaRepository().removeAllDatabase();
+              },
+            ),
+          )
+        ],
+      )
     );
   }
 }
