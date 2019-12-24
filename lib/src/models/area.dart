@@ -19,10 +19,7 @@ class Area {
   static String pointsToString(List<LatLng> points){
     String polyStr = "";
     points.forEach((point){
-      polyStr+=point.latitude.toString();
-      polyStr+=",";
-      polyStr+=point.longitude.toString();
-      polyStr+=",";
+      polyStr += '${point.latitude.toString()},${point.longitude.toString()},';
     });
     polyStr = polyStr.substring(0,polyStr.length-1);
 
