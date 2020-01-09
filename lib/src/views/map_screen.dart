@@ -3,8 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
-import 'package:flutter_map_app/src/repository/area_repository.dart';
-import 'package:flutter_map_app/src/resources/constants.dart';
 
 class MapScreen extends StatefulWidget{
   @override
