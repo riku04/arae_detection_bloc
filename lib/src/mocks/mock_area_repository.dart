@@ -1,4 +1,3 @@
-
 import 'package:flutter_map_app/src/models/area.dart';
 import 'package:flutter_map_app/src/repository/area_repository.dart';
 import 'package:latlong/latlong.dart';

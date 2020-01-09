@@ -1,6 +1,4 @@
-
 import 'dart:async';
-
 import 'package:flutter_map_app/src/database/area_database_provider.dart';
 import 'package:flutter_map_app/src/models/area.dart';
 import 'package:latlong/latlong.dart';

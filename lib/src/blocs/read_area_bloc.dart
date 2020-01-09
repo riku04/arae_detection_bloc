@@ -1,6 +1,4 @@
-
 import 'dart:async';
-
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter_map_app/src/repository/area_repository.dart';
 
