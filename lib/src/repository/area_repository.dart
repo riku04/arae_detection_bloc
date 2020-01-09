@@ -41,7 +41,7 @@ class AreaRepository{
     });
   }
 
-  Future<List<List<LatLng>>> getPointsListFromTableName(String tableName) async{
+  Future<List<List<LatLng>>> getPointsListUsingTableName(String tableName) async{
     final AreaDatabaseProvider provider = AreaDatabaseProvider();
     final Database database = await provider.database;
     return await database.query(tableName).then((maps){

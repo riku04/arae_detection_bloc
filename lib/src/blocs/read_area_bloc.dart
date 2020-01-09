@@ -21,7 +21,6 @@ class ReadAreaBloc extends Bloc{
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _areaListController.close();
   }
 }

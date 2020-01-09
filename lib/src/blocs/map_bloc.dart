@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/models/area.dart';
 import 'package:flutter_map_app/src/repository/area_repository.dart';
+import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:latlong/latlong.dart';
 
 class MapBloc extends Bloc{
@@ -83,8 +84,8 @@ class MapBloc extends Bloc{
     _draftPolygons.clear();
     _draftPolygons.add(new Polygon(
       points: points,
-      color: Color(Colors.grey.value-0x20000000),
-      borderColor: Color(Colors.grey.value-0x20000000),
+      color: Color(Colors.grey.value-Constants.ALPHA_MASK),
+      borderColor: Color(Colors.grey.value),
       borderStrokeWidth: 1.0,
     ));
 
@@ -98,8 +99,8 @@ class MapBloc extends Bloc{
     Polygon polygon = _draftPolygons[0];
     _polygons.add(new Polygon(
       points: polygon.points,
-      color: Color(Colors.red.value-0x20000000),
-      borderColor: Color(Colors.red.value-0x00000000),
+      color: Color(Colors.red.value-Constants.ALPHA_MASK),
+      borderColor: Color(Colors.red.value),
       borderStrokeWidth: 1.0
     ));
     print("determined");
@@ -116,7 +117,7 @@ class MapBloc extends Bloc{
     setLayers.add(layers);
   }
 
-  Future<void> removeAreaFromAreaName(String areaName) async{
+  Future<void> removeAreaUsingAreaName(String areaName) async{
     await AreaRepository().getTableList().then((list){
       if(list.contains(areaName)){
         AreaRepository().removeTable(areaName).then((_){
@@ -149,7 +150,7 @@ class MapBloc extends Bloc{
   }
 
   void readSavedArea(String tableName) async{
-    AreaRepository().getPointsListFromTableName(tableName).then((areaList){
+    AreaRepository().getPointsListUsingTableName(tableName).then((areaList){
       if(areaList.isEmpty){
         return;
       }
@@ -157,8 +158,8 @@ class MapBloc extends Bloc{
       areaList.forEach((points){
         Polygon polygon = new Polygon(
             points: points,
-            color: Color(Colors.red.value-0x20000000),
-            borderColor: Color(Colors.red.value-0x00000000),
+            color: Color(Colors.red.value-Constants.ALPHA_MASK),
+            borderColor: Color(Colors.red.value),
             borderStrokeWidth: 1.0
         );
         _polygons.add(polygon);
@@ -203,9 +204,6 @@ class MapBloc extends Bloc{
            createDraftPolygon(_draftMarkers);
         }
     });
-
-    //readSavedArea(Constants.DEFAULT_AREA_TABLE);
-
   }
   @override
   void dispose() {

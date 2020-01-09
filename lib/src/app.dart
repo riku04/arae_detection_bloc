@@ -27,7 +27,6 @@ class App extends StatelessWidget{
         routes: <String, WidgetBuilder>{
           '/splash-screen':(BuildContext context) => SplashScreen(),
           '/map-screen':(BuildContext context) => MapScreen(),
-
           '/read-area-screen':(BuildContext context) => BlocProvider<ReadAreaBloc>(
             creator: (context, _bag)=> ReadAreaBloc(),
             child: ReadAreaScreen(),
@@ -35,43 +34,6 @@ class App extends StatelessWidget{
 
         },
       ),
-    );
-
-    return BlocProvider<RootBloc>(
-      creator: (context,_bag) => RootBloc(),
-      child: MaterialApp(
-        home: SafeArea(
-          child: Scaffold(
-            body: BlocProvider<MapBloc>(
-              creator: (context, _bag) => MapBloc(),
-              child: MapScreen(),
-            ),
-            drawer: MainDrawer(),
-          ),
-        ),
-        routes: <String, WidgetBuilder>{
-          "/splash-screen":(BuildContext context) => new SplashScreen(),
-          "/map-screen":(BuildContext context) => new MapScreen(),
-        },
-      ),
-    );
-
-    return MaterialApp(
-      home:SafeArea(
-            child: Scaffold(
-              body:BlocProvider<MapBloc>(
-                creator: (context,_bag) => MapBloc(),
-                child: MapScreen(),
-              ),
-              drawer:MainDrawer(),
-            )
-        ),
-      routes: <String,WidgetBuilder>{
-        "/map":(BuildContext context) => BlocProvider<MapBloc>(
-                                          creator: (context,_bag) => MapBloc(),
-                                          child: MapScreen(),
-                                         ),
-      },
     );
   }
 

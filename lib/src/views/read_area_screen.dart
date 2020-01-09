@@ -80,7 +80,7 @@ class _ReadAreaScreenState extends State<ReadAreaScreen>{
                                           child: Text("OK"),
                                           onPressed: (){
                                             print("delete pressed:"+ areaSnapshot.data[index]);
-                                            blocMap.removeAreaFromAreaName(areaSnapshot.data[index]).then((_){
+                                            blocMap.removeAreaUsingAreaName(areaSnapshot.data[index]).then((_){
                                               readAreaBloc.updateAreaList();
                                             });
                                             Navigator.pop(context);
