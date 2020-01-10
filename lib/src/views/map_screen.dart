@@ -1,15 +1,17 @@
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_location/flutter_background_location.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
+import 'package:latlong/latlong.dart';
 
-class MapScreen extends StatefulWidget{
+class MapScreen extends StatefulWidget {
   @override
   _MapScreenState createState() => _MapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen>{
+class _MapScreenState extends State<MapScreen> {
   MapController _mapController;
 
   @override
@@ -20,55 +22,60 @@ class _MapScreenState extends State<MapScreen>{
   }
 
   @override
-  build(BuildContext context){
+  build(BuildContext context) {
     final blocMap = BlocProvider.of<MapBloc>(context);
 
     blocMap.initLayers();
     blocMap.initMapOptions();
 
+    FlutterBackgroundLocation.startLocationService();
+    FlutterBackgroundLocation.getLocationUpdates((location) {
+      print(location);
+      blocMap.addCurrentLocation
+          .add(LatLng(location.latitude, location.longitude));
+    });
+
     return Scaffold(
-      body: Container(
-        child: StreamBuilder<MapOptions>(
-          stream: blocMap.onInitOptions,
-          builder: (context, optionsSnapshot){
-            return StreamBuilder<List<LayerOptions>>(
-             stream: blocMap.onLayersChanged,
-             builder: (context, layersSnapshot){
-               return FlutterMap(
-                 options: optionsSnapshot.data,
-                 mapController: _mapController,
-                 layers: layersSnapshot.data,
-               );
-             },
-            );
-          },
-        ),
-      ),
-      floatingActionButton: Row(
-        verticalDirection: VerticalDirection.up,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          FloatingActionButton.extended(
-            heroTag: "add",
-              backgroundColor: Colors.redAccent,
-              label: Text("add"),
-              onPressed: () {
-                blocMap.addPoint.add(_mapController.center);
-              }
+        body: Container(
+          child: StreamBuilder<MapOptions>(
+            stream: blocMap.onInitOptions,
+            builder: (context, optionsSnapshot) {
+              return StreamBuilder<List<LayerOptions>>(
+                stream: blocMap.onLayersChanged,
+                builder: (context, layersSnapshot) {
+                  return FlutterMap(
+                    options: optionsSnapshot.data,
+                    mapController: _mapController,
+                    layers: layersSnapshot.data,
+                  );
+                },
+              );
+            },
           ),
-          Container(
-            margin: EdgeInsets.only(bottom: 16.0),
-            child: FloatingActionButton.extended(
-              heroTag: "ok",
+        ),
+        floatingActionButton: Row(
+          verticalDirection: VerticalDirection.up,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            FloatingActionButton.extended(
+                heroTag: "add",
+                backgroundColor: Colors.redAccent,
+                label: Text("add"),
+                onPressed: () {
+                  blocMap.addPoint.add(_mapController.center);
+                }),
+            Container(
+              margin: EdgeInsets.only(bottom: 16.0),
+              child: FloatingActionButton.extended(
+                heroTag: "ok",
                 backgroundColor: Colors.yellow,
                 label: Text("ok"),
-                onPressed: (){
+                onPressed: () {
                   blocMap.createPolygon();
                 },
+              ),
             ),
-          ),
-        ],
-      )
-    );
+          ],
+        ));
   }
 }

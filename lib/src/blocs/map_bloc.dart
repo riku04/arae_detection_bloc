@@ -8,9 +8,11 @@ import 'package:flutter_map_app/src/models/area.dart';
 import 'package:flutter_map_app/src/repository/area_repository.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:latlong/latlong.dart';
+import 'package:vibration/vibration.dart';
 
 class MapBloc extends Bloc {
   List<Marker> _draftMarkers; //下書きポリゴンのマーカー
+  List<Marker> _logMarkers;
   List<Polygon>
       _draftPolygons; //PolygonLayerOptionsに下書きポリゴンを渡すためのリスト、要素数が1以上になることはない
   List<Polygon> _polygons; //こちらは禁止領域のポリゴン、複数になる
@@ -20,6 +22,7 @@ class MapBloc extends Bloc {
   List<LayerOptions> layers; //画面更新はこの変数をStreamに流すことで行う
   TileLayerOptions _tileLayer; //地図タイルのレイヤ
   MarkerLayerOptions _draftMarkerLayer; //下書きマーカーのレイヤ
+  MarkerLayerOptions _logMarkerLayer;
   PolygonLayerOptions _draftPolygonLayer; //下書きポリゴンのレイヤ
   PolygonLayerOptions _polygonLayer; //禁止領域ポリゴンのレイヤ
   PolygonLayerOptions _expandedPolygonLayer; //接近領域ポリゴンのレイヤ
@@ -49,7 +52,7 @@ class MapBloc extends Bloc {
         center: new LatLng(35.691075, 139.767828),
         zoom: 13.0,
         onTap: (_latLng) {
-          isInsideArea(_latLng);
+          addCurrentLocation.add(_latLng);
         });
     initOptions.add(_mapOptions);
   }
@@ -60,6 +63,7 @@ class MapBloc extends Bloc {
         urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         subdomains: ['a', 'b', 'c']);
     _draftMarkerLayer = MarkerLayerOptions(markers: _draftMarkers);
+    _logMarkerLayer = MarkerLayerOptions(markers: _logMarkers);
     _draftPolygonLayer = PolygonLayerOptions(polygons: _draftPolygons);
     _polygonLayer = PolygonLayerOptions(polygons: _polygons);
     _expandedPolygonLayer = PolygonLayerOptions(polygons: _expandedPolygons);
@@ -71,6 +75,7 @@ class MapBloc extends Bloc {
     layers.add(_polygonLayer);
     layers.add(_expandedPolygonLayer);
     layers.add(_moreExpandedPolygonLayer);
+    layers.add(_logMarkerLayer);
     _layersController.add(layers);
   }
 
@@ -112,6 +117,7 @@ class MapBloc extends Bloc {
     _polygons.clear();
     _draftPolygons.clear();
     _draftMarkers.clear();
+    _logMarkers.clear();
     setLayers.add(layers);
   }
 
@@ -166,28 +172,39 @@ class MapBloc extends Bloc {
     });
   }
 
-  bool isInsideArea(LatLng targetPoint) {
-    bool result = false;
-    _polygons.forEach((polygon) {
-      List<LatLng> points = polygon.points;
-      for (int i = 0, j = points.length - 1; i < points.length; j = i++) {
-        if ((points[i].latitude > targetPoint.latitude) !=
-                (points[j].latitude > targetPoint.latitude) &&
-            (targetPoint.longitude <
-                (points[j].longitude - points[i].longitude) *
-                        (targetPoint.latitude - points[i].latitude) /
-                        (points[j].latitude - points[i].latitude) +
-                    points[i].longitude)) {
-          result = true;
-        }
-      }
-    });
-    print("inside:" + result.toString());
-    return result;
+  bool _polygonContainsPoint(Polygon polygon, LatLng point) {
+    List<LatLng> points = polygon.points;
+    num px = point.longitude;
+    num py = point.latitude;
+
+    num ax = 0;
+    num ay = 0;
+    num bx = points[points.length - 1].longitude - px;
+    num by = points[points.length - 1].latitude - py;
+    int depth = 0;
+
+    for (int i = 0; i < points.length; i++) {
+      ax = bx;
+      ay = by;
+      bx = points[i].longitude - px;
+      by = points[i].latitude - py;
+
+      if (ay < 0 && by < 0) continue; // both "up" or both "down"
+      if (ay > 0 && by > 0) continue; // both "up" or both "down"
+      if (ax < 0 && bx < 0) continue; // both points on left
+
+      num lx = ax - ay * (bx - ax) / (by - ay);
+
+      if (lx == 0) return true; // point on edge
+      if (lx > 0) depth++;
+    }
+
+    return (depth & 1) == 1;
   }
 
   MapBloc() {
     _draftMarkers = new List();
+    _logMarkers = new List();
     _draftPolygons = new List();
     _polygons = new List();
     _expandedPolygons = new List();
@@ -219,6 +236,46 @@ class MapBloc extends Bloc {
       print(point);
       if (_draftMarkers.length > 2) {
         createDraftPolygon(_draftMarkers);
+      }
+    });
+
+    onCurrentLocationChanged.listen((point) {
+      bool result = false;
+      _polygons.forEach((polygon) {
+        if (_polygonContainsPoint(polygon, point)) {
+          print("inside");
+          result = true;
+        } else {
+          print("outside");
+        }
+      });
+      if (result) {
+        Vibration.hasVibrator().then((bool) {
+          if (bool) {
+            Vibration.vibrate();
+          }
+        });
+        _logMarkers.add(Marker(
+          point: point,
+          builder: (ctx) {
+            return Icon(
+              Icons.location_on,
+              color: Colors.black,
+            );
+          },
+          anchorPos: AnchorPos.align(AnchorAlign.top),
+        ));
+        setLayers.add(layers);
+      } else {
+        _logMarkers.add(Marker(
+            point: point,
+            builder: (ctx) {
+              return Icon(
+                Icons.location_off,
+                color: Colors.green,
+              );
+            }));
+        setLayers.add(layers);
       }
     });
   }

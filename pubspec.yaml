@@ -30,6 +30,8 @@ dependencies:
   sqflite: ^1.2.0
   path_provider: ^1.5.1
   speed_dial: ^0.0.1
+  flutter_background_location: ^0.0.4
+  vibration: 1.2.2
 
 dev_dependencies:
   flutter_test:
