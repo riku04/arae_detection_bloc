@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
-import 'package:flutter_map_app/src/repository/area_repository.dart';
 
 class MapScreen extends StatefulWidget{
   @override
@@ -50,6 +49,7 @@ class _MapScreenState extends State<MapScreen>{
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           FloatingActionButton.extended(
+            heroTag: "add",
               backgroundColor: Colors.redAccent,
               label: Text("add"),
               onPressed: () {
@@ -59,23 +59,14 @@ class _MapScreenState extends State<MapScreen>{
           Container(
             margin: EdgeInsets.only(bottom: 16.0),
             child: FloatingActionButton.extended(
-                backgroundColor: Colors.yellowAccent,
+              heroTag: "ok",
+                backgroundColor: Colors.yellow,
                 label: Text("ok"),
                 onPressed: (){
                   blocMap.createPolygon();
                 },
             ),
           ),
-          Container(
-            margin: EdgeInsets.only(bottom: 16.0),
-            child: FloatingActionButton.extended(
-              backgroundColor: Colors.blueAccent,
-              label: Text("inside?"),
-              onPressed: (){
-                AreaRepository().removeAllDatabase();
-              },
-            ),
-          )
         ],
       )
     );

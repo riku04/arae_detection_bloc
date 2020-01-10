@@ -26,7 +26,7 @@ class Area {
     return polyStr;
   }
 
-  static List<LatLng> stringToPolygon(String polyStr){
+  static List<LatLng> stringToPoints(String polyStr){
     List<String> pointStrList = polyStr.split(",");
     List<LatLng> points = List();
     for(int i=0; i<=pointStrList.length-2; i+=2){

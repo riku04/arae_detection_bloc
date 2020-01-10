@@ -1,13 +1,12 @@
 import 'dart:async';
-
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/models/area.dart';
 import 'package:flutter_map_app/src/repository/area_repository.dart';
+import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:latlong/latlong.dart';
-
 
 class MapBloc extends Bloc{
   List<Marker> _draftMarkers; //下書きポリゴンのマーカー
@@ -45,7 +44,6 @@ class MapBloc extends Bloc{
         });
     initOptions.add(_mapOptions);
   }
-
 
   void initLayers(){
     layers = List();
@@ -86,8 +84,8 @@ class MapBloc extends Bloc{
     _draftPolygons.clear();
     _draftPolygons.add(new Polygon(
       points: points,
-      color: Color(Colors.grey.value-0x20000000),
-      borderColor: Color(Colors.grey.value-0x20000000),
+      color: Color(Colors.grey.value-Constants.ALPHA_MASK),
+      borderColor: Color(Colors.grey.value),
       borderStrokeWidth: 1.0,
     ));
 
@@ -101,8 +99,8 @@ class MapBloc extends Bloc{
     Polygon polygon = _draftPolygons[0];
     _polygons.add(new Polygon(
       points: polygon.points,
-      color: Color(Colors.red.value-0x20000000),
-      borderColor: Color(Colors.red.value-0x00000000),
+      color: Color(Colors.red.value-Constants.ALPHA_MASK),
+      borderColor: Color(Colors.red.value),
       borderStrokeWidth: 1.0
     ));
     print("determined");
@@ -110,27 +108,64 @@ class MapBloc extends Bloc{
 
     _draftMarkers.clear();
     _draftPolygons.clear();
-
-    Area area = Area();
-    area.areaPointsStr = Area.pointsToString(polygon.points);
-    AreaRepository().addPoints("area0", area);  //tableName,Area
   }
 
-  void readSavedArea() async{
-    List<List<LatLng>> areaList = List();
-    areaList = await AreaRepository().getAreaList("area0");
-
+  void removeAllPolygons(){
     _polygons.clear();
-    areaList.forEach((points){
-      Polygon polygon = new Polygon(
-          points: points,
-          color: Color(Colors.red.value-0x20000000),
-          borderColor: Color(Colors.red.value-0x00000000),
-          borderStrokeWidth: 1.0
-      );
-      _polygons.add(polygon);
-    });
+    _draftPolygons.clear();
+    _draftMarkers.clear();
     setLayers.add(layers);
+  }
+
+  Future<void> removeAreaByAreaName(String areaName) async{
+    await AreaRepository().getTableList().then((list){
+      if(list.contains(areaName)){
+        AreaRepository().removeTable(areaName).then((_){
+          print("$areaName:removed");
+          return;
+        });
+      } else {
+        print("area remove error : no such areaname");
+        return;
+      }
+    });
+  }
+
+  void saveCurrentArea(String tableName) async{
+    AreaRepository().getTableList().then((areaList){
+      if(areaList.contains(tableName)){
+        print("table name is already exist");
+        return;
+      }else{
+        AreaRepository().createNewTable(tableName).then((_){
+          _polygons.forEach((polygon){
+            Area area = Area();
+            area.areaPointsStr = Area.pointsToString(polygon.points);
+            print(polygon.points.toString());
+            AreaRepository().addDataToTable(tableName, area);
+          });
+        });
+      }
+    });
+  }
+
+  void readSavedArea(String tableName) async{
+    AreaRepository().getPointsListUsingTableName(tableName).then((areaList){
+      if(areaList.isEmpty){
+        return;
+      }
+      _polygons.clear();
+      areaList.forEach((points){
+        Polygon polygon = new Polygon(
+            points: points,
+            color: Color(Colors.red.value-Constants.ALPHA_MASK),
+            borderColor: Color(Colors.red.value),
+            borderStrokeWidth: 1.0
+        );
+        _polygons.add(polygon);
+      });
+      setLayers.add(layers);
+    });
   }
 
   MapBloc(){
@@ -142,10 +177,14 @@ class MapBloc extends Bloc{
     _moreExpandedPolygons = new List();
 
     onAddPoint.listen((point){
+
+      double latitude = double.parse(point.latitude.toStringAsFixed(7));
+      double longitude = double.parse(point.longitude.toStringAsFixed(7));
+
       Marker _marker = new Marker(
         width: 40.0,
         height: 80.0,
-        point: point,
+        point: LatLng(latitude,longitude),
         builder: (ctx) =>
         new Container(
           child: new FlutterLogo(),
@@ -165,8 +204,6 @@ class MapBloc extends Bloc{
            createDraftPolygon(_draftMarkers);
         }
     });
-
-    readSavedArea();
   }
   @override
   void dispose() {
