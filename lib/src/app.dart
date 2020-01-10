@@ -3,17 +3,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:flutter_map_app/src/blocs/read_area_bloc.dart';
-import 'package:flutter_map_app/src/blocs/root_bloc.dart';
 import 'package:flutter_map_app/src/views/drawer.dart';
 import 'package:flutter_map_app/src/views/map_screen.dart';
 import 'package:flutter_map_app/src/views/read_area_screen.dart';
 import 'package:flutter_map_app/src/views/splash_screen.dart';
 
-class App extends StatelessWidget{
-
+class App extends StatelessWidget {
   @override
-  build(BuildContext context){
-
+  build(BuildContext context) {
     return BlocProvider<MapBloc>(
       creator: (context, _bag) => MapBloc(),
       child: MaterialApp(
@@ -23,18 +20,16 @@ class App extends StatelessWidget{
             drawer: MainDrawer(),
           ),
         ),
-
         routes: <String, WidgetBuilder>{
-          '/splash-screen':(BuildContext context) => SplashScreen(),
-          '/map-screen':(BuildContext context) => MapScreen(),
-          '/read-area-screen':(BuildContext context) => BlocProvider<ReadAreaBloc>(
-            creator: (context, _bag)=> ReadAreaBloc(),
-            child: ReadAreaScreen(),
-          ),
-
+          '/splash-screen': (BuildContext context) => SplashScreen(),
+          '/map-screen': (BuildContext context) => MapScreen(),
+          '/read-area-screen': (BuildContext context) =>
+              BlocProvider<ReadAreaBloc>(
+                creator: (context, _bag) => ReadAreaBloc(),
+                child: ReadAreaScreen(),
+              ),
         },
       ),
     );
   }
-
 }
