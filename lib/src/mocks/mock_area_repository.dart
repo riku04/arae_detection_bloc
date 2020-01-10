@@ -25,7 +25,7 @@ class MockAreaRepository implements AreaRepository{
   }
 
   @override
-  Future<List<List<LatLng>>> getPointsListUsingTableName(String tableName) async {
+  Future<List<List<LatLng>>> getPointsListByTableName(String tableName) async {
     return [
       [LatLng(1,1)],
       [LatLng(2,2)],

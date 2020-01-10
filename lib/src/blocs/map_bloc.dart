@@ -117,7 +117,7 @@ class MapBloc extends Bloc{
     setLayers.add(layers);
   }
 
-  Future<void> removeAreaUsingAreaName(String areaName) async{
+  Future<void> removeAreaByAreaName(String areaName) async{
     await AreaRepository().getTableList().then((list){
       if(list.contains(areaName)){
         AreaRepository().removeTable(areaName).then((_){
