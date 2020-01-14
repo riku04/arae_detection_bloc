@@ -172,7 +172,7 @@ class MapBloc extends Bloc {
     });
   }
 
-  bool _polygonContainsPoint(Polygon polygon, LatLng point) {
+  bool polygonContainsPoint(Polygon polygon, LatLng point) {
     List<LatLng> points = polygon.points;
     num px = point.longitude;
     num py = point.latitude;
@@ -242,7 +242,7 @@ class MapBloc extends Bloc {
     onCurrentLocationChanged.listen((point) {
       bool result = false;
       _polygons.forEach((polygon) {
-        if (_polygonContainsPoint(polygon, point)) {
+        if (polygonContainsPoint(polygon, point)) {
           print("inside");
           result = true;
         } else {
