@@ -4,38 +4,31 @@ import 'package:latlong/latlong.dart';
 class Area {
   String areaPointsStr;
 
-  Area({
-    @required this.areaPointsStr
-  });
+  Area({@required this.areaPointsStr});
 
-  Area.toJson(Map<String,dynamic> json)
-    :areaPointsStr = json['points'];
+  Area.toJson(Map<String, dynamic> json) : areaPointsStr = json['points'];
 
-  Map<String,dynamic> toJson() =>
-      {
+  Map<String, dynamic> toJson() => {
         'points': areaPointsStr,
       };
 
-  static String pointsToString(List<LatLng> points){
+  static String pointsToString(List<LatLng> points) {
     String polyStr = "";
-    points.forEach((point){
+    points.forEach((point) {
       polyStr += '${point.latitude.toString()},${point.longitude.toString()},';
     });
-    polyStr = polyStr.substring(0,polyStr.length-1);
+    polyStr = polyStr.substring(0, polyStr.length - 1);
 
     return polyStr;
   }
 
-  static List<LatLng> stringToPoints(String polyStr){
+  static List<LatLng> stringToPoints(String polyStr) {
     List<String> pointStrList = polyStr.split(",");
     List<LatLng> points = List();
-    for(int i=0; i<=pointStrList.length-2; i+=2){
-      points.add(
-          LatLng(double.parse(pointStrList[i]),
-                  double.parse(pointStrList[i+1]))
-      );
+    for (int i = 0; i <= pointStrList.length - 2; i += 2) {
+      points.add(LatLng(
+          double.parse(pointStrList[i]), double.parse(pointStrList[i + 1])));
     }
     return points;
   }
-
 }
