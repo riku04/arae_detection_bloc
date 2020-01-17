@@ -1,8 +1,10 @@
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map_app/src/blocs/ble_scan_bloc.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:flutter_map_app/src/blocs/read_area_bloc.dart';
+import 'package:flutter_map_app/src/views/ble_scan_screen.dart';
 import 'package:flutter_map_app/src/views/drawer.dart';
 import 'package:flutter_map_app/src/views/map_screen.dart';
 import 'package:flutter_map_app/src/views/read_area_screen.dart';
@@ -27,6 +29,11 @@ class App extends StatelessWidget {
               BlocProvider<ReadAreaBloc>(
                 creator: (context, _bag) => ReadAreaBloc(),
                 child: ReadAreaScreen(),
+              ),
+          '/ble-scan-screen': (BuildContext context) =>
+              BlocProvider<BleScanBloc>(
+                creator: (context, _bag) => BleScanBloc(),
+                child: BleScanScreen(),
               ),
         },
       ),

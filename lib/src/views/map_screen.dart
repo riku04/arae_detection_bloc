@@ -30,7 +30,9 @@ class _MapScreenState extends State<MapScreen> {
 
     FlutterBackgroundLocation.startLocationService();
     FlutterBackgroundLocation.getLocationUpdates((location) {
-      print(location);
+      double latitude = location.latitude;
+      double longitude = location.longitude;
+      //print("$latitude,$longitude");
       blocMap.addCurrentLocation
           .add(LatLng(location.latitude, location.longitude));
     });
