@@ -27,85 +27,110 @@ class _BleScanScreenState extends State<BleScanScreen> {
     final bleScanBloc = BlocProvider.of<BleScanBloc>(context);
 
     return SafeArea(
-        child: Scaffold(
-      appBar: AppBar(title: Text("SCAN DEVICES")),
-      body: StreamBuilder<List<BluetoothDevice>>(
-        stream: bleScanBloc.onDeviceList,
-        builder: (context, deviceSnapshot) {
-          if (!deviceSnapshot.hasData) {
-            return Scaffold();
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async {
-              bleScanBloc.scan();
-              await Future.delayed(
-                  new Duration(seconds: Constants.SCAN_TIMEOUT));
+        child: WillPopScope(
+            onWillPop: () {
+              print("will back");
+              Navigator.of(context).pop();
+              return Future.value(false);
             },
-            child: Scrollbar(
-              child: ListView.builder(
-                itemBuilder: (BuildContext context, int index) {
-                  Color color = Colors.white;
-                  Widget progress = SpaceBox(
-                    width: 1,
-                    height: 1,
-                  );
-                  if ((bleScanBloc.connectedDevice != null) &&
-                      (bleScanBloc.connectedDevice ==
-                          deviceSnapshot.data[index])) {
-                    color = Colors.greenAccent;
-                    progress = CircularProgressIndicator();
+            child: Scaffold(
+              appBar: AppBar(
+                title: Text("SCAN DEVICES"),
+                bottom: PreferredSize(
+                  child: StreamBuilder(
+                    stream: bleScanBloc.onStatus,
+                    builder: (context, statusSnapshot) {
+                      if (statusSnapshot.hasData) {
+                        return Text(
+                          statusSnapshot.data,
+                          style: TextStyle(color: Colors.white),
+                        );
+                      } else {
+                        return Text("");
+                      }
+                    },
+                  ),
+                  preferredSize: null,
+                ),
+              ),
+              body: StreamBuilder<List<BluetoothDevice>>(
+                stream: bleScanBloc.onDeviceListChange,
+                builder: (context, deviceSnapshot) {
+                  if (!deviceSnapshot.hasData) {
+                    return Scaffold();
                   }
 
-                  return Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        SpaceBox(
-                          height: 2.0,
-                        ),
-                        Row(
-                          children: <Widget>[
-                            SpaceBox(
-                              width: 5.0,
-                            ),
-                            Row(
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      bleScanBloc.scan();
+                      await Future.delayed(
+                          new Duration(seconds: Constants.SCAN_TIMEOUT));
+                    },
+                    child: Scrollbar(
+                      child: ListView.builder(
+                        itemBuilder: (BuildContext context, int index) {
+                          Color color = Colors.white;
+                          Widget progress = SpaceBox(
+                            width: 1,
+                            height: 1,
+                          );
+                          if ((bleScanBloc.connectedDevice != null) &&
+                              (bleScanBloc.connectedDevice ==
+                                  deviceSnapshot.data[index])) {
+                            color = Colors.greenAccent;
+                            progress = CircularProgressIndicator();
+                          }
+
+                          return Column(
+                              mainAxisSize: MainAxisSize.max,
                               children: <Widget>[
-                                OutlineButton(
-                                  color: color,
-                                  child: Padding(
-                                    child: Text(
-                                      deviceSnapshot.data[index].name,
-                                      style: TextStyle(fontSize: 22.0),
-                                    ),
-                                    padding: EdgeInsets.all(15.0),
-                                  ),
-                                  onPressed: () {
-                                    print("device name pressed:" +
-                                        deviceSnapshot.data[index].name);
-                                    bleScanBloc
-                                        .connect(deviceSnapshot.data[index]);
-                                  },
-                                ),
                                 SpaceBox(
-                                  width: 5,
+                                  height: 2.0,
                                 ),
-                                progress,
-                              ],
-                            ),
-                            SpaceBox(
-                              width: 5.0,
-                            ),
-                          ],
-                        ),
-                        SpaceBox(height: 2.0)
-                      ]);
+                                Row(
+                                  children: <Widget>[
+                                    SpaceBox(
+                                      width: 5.0,
+                                    ),
+                                    Row(
+                                      children: <Widget>[
+                                        FlatButton(
+                                          color: color,
+                                          child: Padding(
+                                            child: Text(
+                                              deviceSnapshot.data[index].name,
+                                              style: TextStyle(fontSize: 22.0),
+                                            ),
+                                            padding: EdgeInsets.all(15.0),
+                                          ),
+                                          onPressed: () {
+                                            print("device name pressed:" +
+                                                deviceSnapshot
+                                                    .data[index].name);
+                                            bleScanBloc.connect(
+                                                deviceSnapshot.data[index]);
+                                          },
+                                        ),
+                                        SpaceBox(
+                                          width: 5,
+                                        ),
+                                        progress,
+                                      ],
+                                    ),
+                                    SpaceBox(
+                                      width: 5.0,
+                                    ),
+                                  ],
+                                ),
+                                SpaceBox(height: 2.0)
+                              ]);
+                        },
+                        itemCount: deviceSnapshot.data.length,
+                      ),
+                    ),
+                  );
                 },
-                itemCount: deviceSnapshot.data.length,
               ),
-            ),
-          );
-        },
-      ),
-    ));
+            )));
   }
 }
