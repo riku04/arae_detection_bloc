@@ -16,14 +16,15 @@ class UserSettings {
   static const String END_HOUR = 'END_HOUR';
   static const String END_MINUTE = 'END_MINUTE';
   static const String CLOSE_DISTANCE_METER = 'CLOSE_DISTANCE_METER';
-  static const String BEACON_CLOSE_DISTANCE_METER = 'BEACON_CLOSE_DISTANCE_METER';
+  static const String BEACON_CLOSE_DISTANCE_METER =
+      'BEACON_CLOSE_DISTANCE_METER';
   static const String LOG_INTERVAL_SEC = 'LOG_INTERVAL_SEC';
-  static const String SEMI_CLOSE_LOG_INTERVAL_SEC = 'SEMI_CLOSE_LOG_INTERVAL_SEC';
+  static const String SEMI_CLOSE_LOG_INTERVAL_SEC =
+      'SEMI_CLOSE_LOG_INTERVAL_SEC';
   static const String CLOSE_LOG_INTERVAL_SEC = 'CLOSE_LOG_INTERVAL_SEC';
   static const String ENTER_LOG_INTERVAL_SEC = 'ENTER_LOG_INTERVAL_SEC';
   static const String BEACON_LOG_INTERVAL_SEC = 'BEACON_LOG_INTERVAL_SEC';
   static const String BEACON_NAME = 'BEACON_NAME';
-
 
   String _userId;
   String _groupId;
