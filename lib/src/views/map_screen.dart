@@ -1,10 +1,10 @@
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_background_location/flutter_background_location.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
-import 'package:latlong/latlong.dart';
+import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
+import 'package:flutter_map_app/src/resources/constants.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -19,6 +19,19 @@ class _MapScreenState extends State<MapScreen> {
     // TODO: implement initState
     super.initState();
     _mapController = MapController();
+
+    UserSettingsRepository().getTableList().then((tables) {
+      tables.forEach((table) {
+        UserSettingsRepository().getColumnList(table).then((_) {
+          UserSettingsRepository()
+              .addData(Constants.DEFAULT_USER_SETTING_TABLE)
+              .then((_) {
+            UserSettingsRepository()
+                .getColumnList(Constants.DEFAULT_USER_SETTING_TABLE);
+          });
+        });
+      });
+    });
   }
 
   @override
@@ -28,14 +41,14 @@ class _MapScreenState extends State<MapScreen> {
     blocMap.initLayers();
     blocMap.initMapOptions();
 
-    FlutterBackgroundLocation.startLocationService();
-    FlutterBackgroundLocation.getLocationUpdates((location) {
-      double latitude = location.latitude;
-      double longitude = location.longitude;
-      //print("$latitude,$longitude");
-      blocMap.addCurrentLocation
-          .add(LatLng(location.latitude, location.longitude));
-    });
+//    FlutterBackgroundLocation.startLocationService();
+//    FlutterBackgroundLocation.getLocationUpdates((location) {
+//      double latitude = location.latitude;
+//      double longitude = location.longitude;
+//      //print("$latitude,$longitude");
+//      blocMap.addCurrentLocation
+//          .add(LatLng(location.latitude, location.longitude));
+//    });
 
     return Scaffold(
         body: Container(
