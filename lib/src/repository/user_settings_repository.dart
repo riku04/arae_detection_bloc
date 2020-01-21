@@ -1,5 +1,6 @@
 import 'package:flutter_map_app/src/database/user_settings_database_provder.dart';
 import 'package:flutter_map_app/src/models/user_settings.dart';
+import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 class UserSettingsRepository {
@@ -21,11 +22,12 @@ class UserSettingsRepository {
     });
   }
 
-  Future<List<String>> getColumnList(String tableName) async {
+  Future<List<String>> getColumnList() async {
     final UserSettingsDatabaseProvider provider =
         UserSettingsDatabaseProvider();
     final Database database = await provider.database;
-    return await database.rawQuery("SELECT * FROM '$tableName'").then((list) {
+    String table = Constants.DEFAULT_USER_SETTING_TABLE;
+    return await database.rawQuery("SELECT * FROM '$table'").then((list) {
       print("getCulmnList...");
       print(list.length);
       List<String> column = List();
@@ -38,13 +40,36 @@ class UserSettingsRepository {
     });
   }
 
-  Future<void> addData(String tableName) async {
+  Future<dynamic> getValueByColumnName(String column) async {
     final UserSettingsDatabaseProvider provider =
         UserSettingsDatabaseProvider();
     final Database database = await provider.database;
+    String table = Constants.DEFAULT_USER_SETTING_TABLE;
+    return await getColumnList().then((list) {
+      if (list.length == 0) {
+        initData().then((_) {
+          database.rawQuery("SELECT $column FROM $table").then((list) {
+            print("$column:" + list[0][column]);
+            return list[0][column];
+          });
+        });
+      } else {
+        database.rawQuery("SELECT $column FROM $table").then((list) {
+          print("$column:" + list[0][column]);
+          return list[0][column];
+        });
+      }
+    });
+  }
+
+  Future<void> initData() async {
+    final UserSettingsDatabaseProvider provider =
+        UserSettingsDatabaseProvider();
+    final Database database = await provider.database;
+    String table = Constants.DEFAULT_USER_SETTING_TABLE;
     UserSettings userSettings = UserSettings();
-    database.insert(tableName, userSettings.toJson()).then((_) {
-      print("data added");
+    database.insert(table, userSettings.toJson()).then((_) {
+      print("init user settings");
       return;
     });
   }

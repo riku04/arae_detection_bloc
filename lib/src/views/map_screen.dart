@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
-import 'package:flutter_map_app/src/resources/constants.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -20,18 +19,8 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     _mapController = MapController();
 
-    UserSettingsRepository().getTableList().then((tables) {
-      tables.forEach((table) {
-        UserSettingsRepository().getColumnList(table).then((_) {
-          UserSettingsRepository()
-              .addData(Constants.DEFAULT_USER_SETTING_TABLE)
-              .then((_) {
-            UserSettingsRepository()
-                .getColumnList(Constants.DEFAULT_USER_SETTING_TABLE);
-          });
-        });
-      });
-    });
+    UserSettingsRepository().getValueByColumnName("USER_ID");
+    UserSettingsRepository().getValueByColumnName("ADNIM");
   }
 
   @override
