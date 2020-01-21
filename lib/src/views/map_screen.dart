@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
+import 'package:flutter_map_app/src/models/user_settings.dart';
 import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 
 class MapScreen extends StatefulWidget {
@@ -19,8 +20,20 @@ class _MapScreenState extends State<MapScreen> {
     super.initState();
     _mapController = MapController();
 
-    UserSettingsRepository().getValueByColumnName("USER_ID");
-    UserSettingsRepository().getValueByColumnName("ADNIM");
+
+   UserSettingsRepository().getValues().then((list){
+     list.keys.forEach((key){
+       print(key+":"+list[key].toString());
+     });
+     UserSettingsRepository().setValue(UserSettings.GROUP_ID, "changed_group_id").then((_){
+       UserSettingsRepository().getValues().then((list){
+         list.keys.forEach((key){
+           print(key+":"+list[key].toString());
+         });
+       });
+     });
+   });
+
   }
 
   @override

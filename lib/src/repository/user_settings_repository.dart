@@ -4,6 +4,7 @@ import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:sqflite/sqflite.dart';
 
 class UserSettingsRepository {
+
   Future<List<String>> getTableList() async {
     final UserSettingsDatabaseProvider provider =
         UserSettingsDatabaseProvider();
@@ -22,66 +23,44 @@ class UserSettingsRepository {
     });
   }
 
-  Future<List<String>> getColumnList() async {
-    final UserSettingsDatabaseProvider provider =
-        UserSettingsDatabaseProvider();
-    final Database database = await provider.database;
-    String table = Constants.DEFAULT_USER_SETTING_TABLE;
-    return await database.rawQuery("SELECT * FROM '$table'").then((list) {
-      print("getCulmnList...");
-      print(list.length);
-      List<String> column = List();
-      list.forEach((map) {
-        map.keys.forEach((key) {
-          print(key + ":" + map[key].toString());
-        });
-      });
-      return column;
-    });
-  }
-
-  Future<dynamic> getValueByColumnName(String column) async {
-    final UserSettingsDatabaseProvider provider =
-        UserSettingsDatabaseProvider();
-    final Database database = await provider.database;
-    String table = Constants.DEFAULT_USER_SETTING_TABLE;
-    return await getColumnList().then((list) {
-      if (list.length == 0) {
-        initData().then((_) {
-          database.rawQuery("SELECT $column FROM $table").then((list) {
-            print("$column:" + list[0][column]);
-            return list[0][column];
-          });
-        });
-      } else {
-        database.rawQuery("SELECT $column FROM $table").then((list) {
-          print("$column:" + list[0][column]);
-          return list[0][column];
-        });
-      }
-    });
-  }
-
   Future<void> initData() async {
     final UserSettingsDatabaseProvider provider =
-        UserSettingsDatabaseProvider();
+    UserSettingsDatabaseProvider();
     final Database database = await provider.database;
     String table = Constants.DEFAULT_USER_SETTING_TABLE;
     UserSettings userSettings = UserSettings();
-    database.insert(table, userSettings.toJson()).then((_) {
-      print("init user settings");
+    await database.insert(table, userSettings.toJson()).then((_) {
+      print("******init user settings******");
       return;
     });
   }
 
-  Future<void> getData(String tableName) async {
+  Future<Map<String,dynamic>> getValues() async{
+    String table = Constants.DEFAULT_USER_SETTING_TABLE;
     final UserSettingsDatabaseProvider provider =
-        UserSettingsDatabaseProvider();
+    UserSettingsDatabaseProvider();
     final Database database = await provider.database;
-    await database.query(tableName).then((maps) {
-      maps.forEach((value) {
-        print(value['USER_ID']);
-      });
-    });
+
+    List list = await database.rawQuery("SELECT * FROM $table");
+    if(list.isEmpty){
+      await initData();
+      list = await database.rawQuery("SELECT * FROM $table");
+      return list[0];
+    }else{
+      return list[0];
+    }
   }
+
+  Future<void> setValue(String column, String value)async{
+    String table = Constants.DEFAULT_USER_SETTING_TABLE;
+    final UserSettingsDatabaseProvider provider =
+    UserSettingsDatabaseProvider();
+    final Database database = await provider.database;
+    await database.rawUpdate("UPDATE $table SET $column = ?",["$value"]).then((_){
+      print("******update user settings******");
+    });
+
+  }
+
+
 }

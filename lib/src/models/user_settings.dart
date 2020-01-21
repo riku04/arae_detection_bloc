@@ -11,16 +11,14 @@ class UserSettings {
   static const String START_MINUTE = 'START_MINUTE';
   static const String START_LUNCH_HOUR = 'START_LUNCH_HOUR';
   static const String START_LUNCH_MINUTE = 'START_LUNCH_MINUTE';
-  static const String END_LUNCH_HOUR = 'END_LLUNCH_HOUR';
+  static const String END_LUNCH_HOUR = 'END_LUNCH_HOUR';
   static const String END_LUNCH_MINUTE = 'END_LUNCH_MINUTE';
   static const String END_HOUR = 'END_HOUR';
   static const String END_MINUTE = 'END_MINUTE';
   static const String CLOSE_DISTANCE_METER = 'CLOSE_DISTANCE_METER';
-  static const String BEACON_CLOSE_DISTANCE_METER =
-      'BEACON_CLOSE_DISTANCE_METER';
+  static const String BEACON_CLOSE_DISTANCE_METER = 'BEACON_CLOSE_DISTANCE_METER';
   static const String LOG_INTERVAL_SEC = 'LOG_INTERVAL_SEC';
-  static const String SEMI_CLOSE_LOG_INTERVAL_SEC =
-      'SEMI_CLOSE_LOG_INTERVAL_SEC';
+  static const String SEMI_CLOSE_LOG_INTERVAL_SEC = 'SEMI_CLOSE_LOG_INTERVAL_SEC';
   static const String CLOSE_LOG_INTERVAL_SEC = 'CLOSE_LOG_INTERVAL_SEC';
   static const String ENTER_LOG_INTERVAL_SEC = 'ENTER_LOG_INTERVAL_SEC';
   static const String BEACON_LOG_INTERVAL_SEC = 'BEACON_LOG_INTERVAL_SEC';
@@ -56,6 +54,7 @@ class UserSettings {
     _groupId = "group";
     _admin = false;
     _enterAlertOn = true;
+    _closeAlertOn = true;
     _beaconAlertOn = true;
     _vibrationOn = true;
     _loggingOn = true;
@@ -120,14 +119,14 @@ class UserSettings {
         END_LUNCH_MINUTE: _endLunchMinute,
         END_HOUR: _endHour,
         END_MINUTE: _endMinute,
-        'CLOSE_DISTANCE_METER': _closeDistanceMeter,
-        'BEACON_CLOSE_DISTANCE_METER': _beaconCloseDistanceMeter,
-        'LOG_INTERVAL_SEC': _logIntervalSec,
-        'SEMI_CLOSE_LOG_INTERVAL_SEC': _semiCloseLogIntervalSec,
-        'CLOSE_LOG_INTERVAL_SEC': _closeLogIntervalSec,
-        'ENTER_LOG_INTERVAL_SEC': _enterLogIntervalSec,
-        'BEACON_LOG_INTERVAL_SEC': _beaconLogIntervalSec,
-        'BEACON_NAME': _beaconNameListString,
+        CLOSE_DISTANCE_METER: _closeDistanceMeter,
+        BEACON_CLOSE_DISTANCE_METER: _beaconCloseDistanceMeter,
+        LOG_INTERVAL_SEC: _logIntervalSec,
+        SEMI_CLOSE_LOG_INTERVAL_SEC: _semiCloseLogIntervalSec,
+        CLOSE_LOG_INTERVAL_SEC: _closeLogIntervalSec,
+        ENTER_LOG_INTERVAL_SEC: _enterLogIntervalSec,
+        BEACON_LOG_INTERVAL_SEC: _beaconLogIntervalSec,
+        BEACON_NAME: _beaconNameListString,
       };
 
   String stringJoiner(List<String> list) {

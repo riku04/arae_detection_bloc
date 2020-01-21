@@ -25,7 +25,7 @@ class UserSettingsDatabaseProvider extends DatabaseProvider {
           START_MINUTE INTEGER DEFAULT 0,          
           START_LUNCH_HOUR INTEGER DEFAULT 12,   
           START_LUNCH_MINUTE INTEGER DEFAULT 0,
-          END_LLUNCH_HOUR INTEGER DEFAULT 13,      
+          END_LUNCH_HOUR INTEGER DEFAULT 13,      
           END_LUNCH_MINUTE INTEGER DEFAULT 0,   
           END_HOUR INTEGER DEFAULT 18,                  
           END_MINUTE INTEGER DEFAULT 0,              
