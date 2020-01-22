@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,21 +22,6 @@ class _MapScreenState extends State<MapScreen> {
     // TODO: implement initState
     super.initState();
     _mapController = MapController();
-
-
-   UserSettingsRepository().getValues().then((list){
-     list.keys.forEach((key){
-       print(key+":"+list[key].toString());
-     });
-     UserSettingsRepository().setValue(UserSettings.GROUP_ID, "changed_group_id").then((_){
-       UserSettingsRepository().getValues().then((list){
-         list.keys.forEach((key){
-           print(key+":"+list[key].toString());
-         });
-       });
-     });
-   });
-
   }
 
   @override
@@ -43,6 +31,7 @@ class _MapScreenState extends State<MapScreen> {
     blocMap.initLayers();
     blocMap.initMapOptions();
 
+    //エラー起きるので一旦コメントアウト
 //    FlutterBackgroundLocation.startLocationService();
 //    FlutterBackgroundLocation.getLocationUpdates((location) {
 //      double latitude = location.latitude;

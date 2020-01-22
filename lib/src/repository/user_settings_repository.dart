@@ -59,8 +59,6 @@ class UserSettingsRepository {
     await database.rawUpdate("UPDATE $table SET $column = ?",["$value"]).then((_){
       print("******update user settings******");
     });
-
   }
-
 
 }
