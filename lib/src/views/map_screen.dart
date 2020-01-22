@@ -1,13 +1,8 @@
-import 'dart:convert';
-import 'dart:math';
-
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
-import 'package:flutter_map_app/src/models/user_settings.dart';
-import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -30,16 +25,6 @@ class _MapScreenState extends State<MapScreen> {
 
     blocMap.initLayers();
     blocMap.initMapOptions();
-
-    //エラー起きるので一旦コメントアウト
-//    FlutterBackgroundLocation.startLocationService();
-//    FlutterBackgroundLocation.getLocationUpdates((location) {
-//      double latitude = location.latitude;
-//      double longitude = location.longitude;
-//      //print("$latitude,$longitude");
-//      blocMap.addCurrentLocation
-//          .add(LatLng(location.latitude, location.longitude));
-//    });
 
     return Scaffold(
         body: Container(

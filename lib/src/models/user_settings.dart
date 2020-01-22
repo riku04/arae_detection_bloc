@@ -1,3 +1,10 @@
+enum Parameter{
+  USER_ID,
+  GROUP_ID,
+  ADMIN,
+  ENTER_ALERT_ON
+}
+
 class UserSettings {
   static const String USER_ID = "USER_ID";
   static const String GROUP_ID = "GROUP_ID";
@@ -24,117 +31,110 @@ class UserSettings {
   static const String BEACON_LOG_INTERVAL_SEC = 'BEACON_LOG_INTERVAL_SEC';
   static const String BEACON_NAME = 'BEACON_NAME';
 
-  String _userId;
-  String _groupId;
-  bool _admin;
-  bool _enterAlertOn;
-  bool _closeAlertOn;
-  bool _beaconAlertOn;
-  bool _vibrationOn;
-  bool _loggingOn;
-  int _startHour;
-  int _startMinute;
-  int _startLunchHour;
-  int _startLunchMinute;
-  int _endLunchHour;
-  int _endLunchMinute;
-  int _endHour;
-  int _endMinute;
-  int _closeDistanceMeter;
-  int _beaconCloseDistanceMeter;
-  int _logIntervalSec;
-  int _semiCloseLogIntervalSec;
-  int _closeLogIntervalSec;
-  int _enterLogIntervalSec;
-  int _beaconLogIntervalSec;
-  String _beaconNameListString;
+  final String userId;
+  final String groupId;
+  final bool admin;
+  final bool enterAlertOn;
+  final bool closeAlertOn;
+  final bool beaconAlertOn;
+  final bool vibrationOn;
+  final bool loggingOn;
+  final int startHour;
+  final int startMinute;
+  final int startLunchHour;
+  final int startLunchMinute;
+  final int endLunchHour;
+  final int endLunchMinute;
+  final int endHour;
+  final int endMinute;
+  final int closeDistanceMeter;
+  final int beaconCloseDistanceMeter;
+  final int logIntervalSec;
+  final int semiCloseLogIntervalSec;
+  final int closeLogIntervalSec;
+  final int enterLogIntervalSec;
+  final int beaconLogIntervalSec;
+  final String beaconNameListString;
 
-  UserSettings() {
-    _userId = "user";
-    _groupId = "group";
-    _admin = false;
-    _enterAlertOn = true;
-    _closeAlertOn = true;
-    _beaconAlertOn = true;
-    _vibrationOn = true;
-    _loggingOn = true;
-    _startHour = 9;
-    _startMinute = 0;
-    _startLunchHour = 12;
-    _startLunchMinute = 0;
-    _endLunchHour = 13;
-    _endLunchMinute = 0;
-    _endHour = 18;
-    _endMinute = 0;
-    _closeDistanceMeter = 10;
-    _beaconCloseDistanceMeter = 10;
-    _logIntervalSec = 10;
-    _semiCloseLogIntervalSec = 10;
-    _closeLogIntervalSec = 5;
-    _enterLogIntervalSec = 3;
-    _beaconLogIntervalSec = 3;
-    _beaconNameListString = "";
-  }
+  UserSettings({
+    this.userId = "user",
+    this.groupId = "group",
+    this.admin = false,
+    this.enterAlertOn = true,
+    this.closeAlertOn = true,
+    this.beaconAlertOn = true,
+    this.vibrationOn = true,
+    this.loggingOn = true,
+    this.startHour = 9,
+    this.startMinute = 0,
+    this.startLunchHour = 12,
+    this.startLunchMinute = 0,
+    this.endLunchHour = 13,
+    this.endLunchMinute = 0,
+    this.endHour = 18,
+    this.endMinute = 0,
+    this.closeDistanceMeter = 10,
+    this.beaconCloseDistanceMeter = 10,
+    this.logIntervalSec = 10,
+    this.semiCloseLogIntervalSec = 10,
+    this.closeLogIntervalSec = 5,
+    this.enterLogIntervalSec = 3,
+    this.beaconLogIntervalSec = 3,
+    this.beaconNameListString = ""
+  });
 
   UserSettings.toJson(Map<String, dynamic> json)
-      : _userId = json[USER_ID],
-        _groupId = json[GROUP_ID],
-        _admin = json[ADMIN],
-        _enterAlertOn = json[ENTER_ALERT_ON],
-        _closeAlertOn = json[CLOSE_ALERT_ON],
-        _beaconAlertOn = json[BEACON_ALERT_ON],
-        _vibrationOn = json[VIBRATION_ON],
-        _loggingOn = json[LOGGING_ON],
-        _startHour = json[START_HOUR],
-        _startMinute = json[START_MINUTE],
-        _startLunchHour = json[START_LUNCH_HOUR],
-        _startLunchMinute = json[START_LUNCH_MINUTE],
-        _endLunchHour = json[END_LUNCH_HOUR],
-        _endLunchMinute = json[END_LUNCH_MINUTE],
-        _endHour = json[END_HOUR],
-        _endMinute = json[END_MINUTE],
-        _closeDistanceMeter = json[CLOSE_DISTANCE_METER],
-        _beaconCloseDistanceMeter = json[BEACON_CLOSE_DISTANCE_METER],
-        _logIntervalSec = json[LOG_INTERVAL_SEC],
-        _semiCloseLogIntervalSec = json[SEMI_CLOSE_LOG_INTERVAL_SEC],
-        _closeLogIntervalSec = json[CLOSE_LOG_INTERVAL_SEC],
-        _enterLogIntervalSec = json[ENTER_LOG_INTERVAL_SEC],
-        _beaconLogIntervalSec = json[BEACON_LOG_INTERVAL_SEC],
-        _beaconNameListString = json[BEACON_NAME];
+      : userId = json[USER_ID],
+        groupId = json[GROUP_ID],
+        admin = json[ADMIN],
+        enterAlertOn = json[ENTER_ALERT_ON],
+        closeAlertOn = json[CLOSE_ALERT_ON],
+        beaconAlertOn = json[BEACON_ALERT_ON],
+        vibrationOn = json[VIBRATION_ON],
+        loggingOn = json[LOGGING_ON],
+        startHour = json[START_HOUR],
+        startMinute = json[START_MINUTE],
+        startLunchHour = json[START_LUNCH_HOUR],
+        startLunchMinute = json[START_LUNCH_MINUTE],
+        endLunchHour = json[END_LUNCH_HOUR],
+        endLunchMinute = json[END_LUNCH_MINUTE],
+        endHour = json[END_HOUR],
+        endMinute = json[END_MINUTE],
+        closeDistanceMeter = json[CLOSE_DISTANCE_METER], 
+        beaconCloseDistanceMeter = json[BEACON_CLOSE_DISTANCE_METER],
+        logIntervalSec = json[LOG_INTERVAL_SEC],
+        semiCloseLogIntervalSec = json[SEMI_CLOSE_LOG_INTERVAL_SEC],
+        closeLogIntervalSec = json[CLOSE_LOG_INTERVAL_SEC],
+        enterLogIntervalSec = json[ENTER_LOG_INTERVAL_SEC],
+        beaconLogIntervalSec = json[BEACON_LOG_INTERVAL_SEC],
+        beaconNameListString = json[BEACON_NAME];
 
   Map<String, dynamic> toJson() => {
-        USER_ID: _userId,
-        GROUP_ID: _groupId,
-        ADMIN: _admin,
-        ENTER_ALERT_ON: _enterAlertOn,
-        CLOSE_ALERT_ON: _closeAlertOn,
-        BEACON_ALERT_ON: _beaconAlertOn,
-        VIBRATION_ON: _vibrationOn,
-        LOGGING_ON: _loggingOn,
-        START_HOUR: _startHour,
-        START_MINUTE: _startMinute,
-        START_LUNCH_HOUR: _startLunchHour,
-        START_LUNCH_MINUTE: _startLunchMinute,
-        END_LUNCH_HOUR: _endLunchHour,
-        END_LUNCH_MINUTE: _endLunchMinute,
-        END_HOUR: _endHour,
-        END_MINUTE: _endMinute,
-        CLOSE_DISTANCE_METER: _closeDistanceMeter,
-        BEACON_CLOSE_DISTANCE_METER: _beaconCloseDistanceMeter,
-        LOG_INTERVAL_SEC: _logIntervalSec,
-        SEMI_CLOSE_LOG_INTERVAL_SEC: _semiCloseLogIntervalSec,
-        CLOSE_LOG_INTERVAL_SEC: _closeLogIntervalSec,
-        ENTER_LOG_INTERVAL_SEC: _enterLogIntervalSec,
-        BEACON_LOG_INTERVAL_SEC: _beaconLogIntervalSec,
-        BEACON_NAME: _beaconNameListString,
+        USER_ID:userId,
+        GROUP_ID:groupId,
+        ADMIN:admin,
+        ENTER_ALERT_ON:enterAlertOn,
+        CLOSE_ALERT_ON:closeAlertOn,
+        BEACON_ALERT_ON:beaconAlertOn,
+        VIBRATION_ON:vibrationOn,
+        LOGGING_ON:loggingOn,
+        START_HOUR:startHour,
+        START_MINUTE:startMinute,
+        START_LUNCH_HOUR:startLunchHour,
+        START_LUNCH_MINUTE:startLunchMinute,
+        END_LUNCH_HOUR:endLunchHour,
+        END_LUNCH_MINUTE:endLunchMinute,
+        END_HOUR:endHour,
+        END_MINUTE:endMinute,
+        CLOSE_DISTANCE_METER:closeDistanceMeter,
+        BEACON_CLOSE_DISTANCE_METER:beaconCloseDistanceMeter,
+        LOG_INTERVAL_SEC:logIntervalSec,
+        SEMI_CLOSE_LOG_INTERVAL_SEC:semiCloseLogIntervalSec,
+        CLOSE_LOG_INTERVAL_SEC:closeLogIntervalSec,
+        ENTER_LOG_INTERVAL_SEC:enterLogIntervalSec,
+        BEACON_LOG_INTERVAL_SEC:beaconLogIntervalSec,
+        BEACON_NAME:beaconNameListString,
       };
 
-  String stringJoiner(List<String> list) {
-    String string = "";
-    list.forEach((name) {
-      string += name + ",";
-    });
-    string = string.substring(0, string.length - 1);
-    return string;
-  }
+
 }

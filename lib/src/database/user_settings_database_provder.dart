@@ -13,8 +13,8 @@ class UserSettingsDatabaseProvider extends DatabaseProvider {
   createDatabase(Database db, int version) => db.execute(
         """
           CREATE TABLE $tableName(
-          USER_ID TEXT DEFAULT user_0,                    
-          GROUP_ID TEXT DEFAULT group_0,                  
+          USER_ID TEXT DEFAULT user,                    
+          GROUP_ID TEXT DEFAULT group,                  
           ADMIN INTEGER DEFAULT 0,                       
           ENTER_ALERT_ON INTEGER DEFAULT 1,       
           CLOSE_ALERT_ON INTEGER DEFAULT 1,       
