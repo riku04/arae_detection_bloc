@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
+import 'package:flutter_map_app/src/utilities/logger.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -11,10 +14,10 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   MapController _mapController;
+  Logger logger;
 
   @override
-  void initState() {
-    // TODO: implement initState
+  void initState(){
     super.initState();
     _mapController = MapController();
   }

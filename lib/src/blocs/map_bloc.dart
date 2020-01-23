@@ -6,15 +6,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/models/area.dart';
 import 'package:flutter_map_app/src/repository/area_repository.dart';
+import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
+import 'package:flutter_map_app/src/utilities/helper.dart';
+import 'package:flutter_map_app/src/utilities/logger.dart';
 import 'package:latlong/latlong.dart';
 import 'package:vibration/vibration.dart';
 
 class MapBloc extends Bloc {
+  Logger _logger;
+
   List<Marker> _draftMarkers; //下書きポリゴンのマーカー
   List<Marker> _logMarkers;
-  List<Polygon>
-      _draftPolygons; //PolygonLayerOptionsに下書きポリゴンを渡すためのリスト、要素数が1以上になることはない
+  List<Polygon>_draftPolygons; //PolygonLayerOptionsに下書きポリゴンを渡すためのリスト、要素数が1以上になることはない
   List<Polygon> _polygons; //こちらは禁止領域のポリゴン、複数になる
   List<Polygon> _expandedPolygons; //接近領域
   List<Polygon> _moreExpandedPolygons; //準接近領域
@@ -44,8 +48,7 @@ class MapBloc extends Bloc {
   final _currentLocationController =
       StreamController<LatLng>.broadcast(); //>>isInside,addLog
   Sink<LatLng> get addCurrentLocation => _currentLocationController.sink;
-  Stream<LatLng> get onCurrentLocationChanged =>
-      _currentLocationController.stream;
+  Stream<LatLng> get onCurrentLocationChanged => _currentLocationController.stream;
 
   void initMapOptions() {
     MapOptions _mapOptions = new MapOptions(
@@ -109,6 +112,8 @@ class MapBloc extends Bloc {
     print("determined");
     setLayers.add(layers);
 
+    _logger = Logger(_polygons);
+
     _draftMarkers.clear();
     _draftPolygons.clear();
   }
@@ -144,7 +149,7 @@ class MapBloc extends Bloc {
         AreaRepository().createNewTable(tableName).then((_) {
           _polygons.forEach((polygon) {
             Area area =
-                Area(areaPointsStr: Area.pointsToString(polygon.points));
+                Area(areaPointsStr: Helper.pointsToString(polygon.points));
             //area.areaPointsStr = Area.pointsToString(polygon.points);
             print(polygon.points.toString());
             AreaRepository().addDataToTable(tableName, area);
@@ -202,13 +207,15 @@ class MapBloc extends Bloc {
     return (depth & 1) == 1;
   }
 
-  MapBloc() {
+  MapBloc()  {
     _draftMarkers = new List();
     _logMarkers = new List();
     _draftPolygons = new List();
     _polygons = new List();
     _expandedPolygons = new List();
     _moreExpandedPolygons = new List();
+
+    _logger = Logger(_polygons);
 
     onAddPoint.listen((point) {
       double latitude = double.parse(point.latitude.toStringAsFixed(7));
@@ -224,10 +231,8 @@ class MapBloc extends Bloc {
       );
 
       if (_draftMarkers.length >= 1) {
-        if ((_draftMarkers[_draftMarkers.length - 1].point.latitude ==
-                point.latitude) &&
-            (_draftMarkers[_draftMarkers.length - 1].point.longitude ==
-                point.longitude)) {
+        if ((_draftMarkers[_draftMarkers.length - 1].point.latitude == point.latitude) &&
+            (_draftMarkers[_draftMarkers.length - 1].point.longitude == point.longitude)) {
           return; //同じ座標に連続してマーカーは置けない
         }
       }
@@ -239,7 +244,15 @@ class MapBloc extends Bloc {
       }
     });
 
-    onCurrentLocationChanged.listen((point) {
+    onCurrentLocationChanged.listen((point) async {
+      await _logger.addLog(DateTime.now(), point, 0);
+      List<String> lines = await _logger.readLines();
+      print("************");
+//      lines.forEach((line) {
+//        print(line);
+//      });
+      print("************");
+
       bool result = false;
       _polygons.forEach((polygon) {
         if (polygonContainsPoint(polygon, point)) {

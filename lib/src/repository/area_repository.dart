@@ -1,5 +1,6 @@
 import 'package:flutter_map_app/src/database/area_database_provider.dart';
 import 'package:flutter_map_app/src/models/area.dart';
+import 'package:flutter_map_app/src/utilities/helper.dart';
 import 'package:latlong/latlong.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -55,7 +56,7 @@ class AreaRepository {
         List<List<LatLng>> areaList = List();
         strList.forEach((str) {
           List<LatLng> points = List();
-          points = Area.stringToPoints(str);
+          points = Helper.stringToPoints(str);
           areaList.add(points);
         });
 
