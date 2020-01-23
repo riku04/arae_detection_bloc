@@ -12,23 +12,5 @@ class Area {
         'points': areaPointsStr,
       };
 
-  static String pointsToString(List<LatLng> points) {
-    String polyStr = "";
-    points.forEach((point) {
-      polyStr += '${point.latitude.toString()},${point.longitude.toString()},';
-    });
-    polyStr = polyStr.substring(0, polyStr.length - 1);
 
-    return polyStr;
-  }
-
-  static List<LatLng> stringToPoints(String polyStr) {
-    List<String> pointStrList = polyStr.split(",");
-    List<LatLng> points = List();
-    for (int i = 0; i <= pointStrList.length - 2; i += 2) {
-      points.add(LatLng(
-          double.parse(pointStrList[i]), double.parse(pointStrList[i + 1])));
-    }
-    return points;
-  }
 }
