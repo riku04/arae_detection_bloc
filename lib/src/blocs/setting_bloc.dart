@@ -6,10 +6,10 @@ import 'package:flutter_map_app/src/models/user_settings.dart';
 import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 
 class SettingBloc extends Bloc{
-
-
   Map<String,dynamic> prevSettings;
   Map<String,dynamic> settings;
+
+  UserSettings userSettings;
 
   final _userIdController = StreamController<String>();
   Sink<String> get userId => _userIdController.sink;
@@ -111,6 +111,31 @@ class SettingBloc extends Bloc{
     settings = Map.from(await UserSettingsRepository().getValues());
     prevSettings = Map.from(settings);
 
+    userSettings.userId = (settings[UserSettings.USER_ID]);
+    userSettings.groupId = (settings[UserSettings.GROUP_ID]);
+    userSettings.admin = (settings[UserSettings.ADMIN]);
+    userSettings.enterAlertOn = (settings[UserSettings.ENTER_ALERT_ON]);
+    userSettings.closeAlertOn = (settings[UserSettings.CLOSE_ALERT_ON]);
+    userSettings.beaconAlertOn = (settings[UserSettings.BEACON_ALERT_ON]);
+    userSettings.vibrationOn = (settings[UserSettings.VIBRATION_ON]);
+    userSettings.loggingOn = (settings[UserSettings.LOGGING_ON]);
+    userSettings.startHour = (settings[UserSettings.START_HOUR]);
+    userSettings.startMinute = (settings[UserSettings.START_MINUTE]);
+    userSettings.startLunchHour = (settings[UserSettings.START_LUNCH_HOUR]);
+    userSettings.startLunchMinute = (settings[UserSettings.START_LUNCH_MINUTE]);
+    userSettings.endLunchHour = (settings[UserSettings.END_LUNCH_HOUR]);
+    userSettings.endLunchMinute = (settings[UserSettings.END_LUNCH_MINUTE]);
+    userSettings.endHour = (settings[UserSettings.END_HOUR]);
+    userSettings.endMinute = (settings[UserSettings.END_MINUTE]);
+    userSettings.closeDistanceMeter = (settings[UserSettings.CLOSE_DISTANCE_METER]);
+    userSettings.beaconCloseDistanceMeter = (settings[UserSettings.BEACON_CLOSE_DISTANCE_METER]);
+    userSettings.logIntervalSec = (settings[UserSettings.LOG_INTERVAL_SEC]);
+    userSettings.semiCloseLogIntervalSec = (settings[UserSettings.SEMI_CLOSE_LOG_INTERVAL_SEC]);
+    userSettings.closeLogIntervalSec = (settings[UserSettings.CLOSE_LOG_INTERVAL_SEC]);
+    userSettings.enterLogIntervalSec = (settings[UserSettings.ENTER_LOG_INTERVAL_SEC]);
+    userSettings.beaconLogIntervalSec = (settings[UserSettings.BEACON_LOG_INTERVAL_SEC]);
+    userSettings.beaconNameListString = (settings[UserSettings.BEACON_NAME_LIST_STRING]);
+    
     userId.add(settings[UserSettings.USER_ID]);
     groupId.add(settings[UserSettings.GROUP_ID]);
     admin.add(settings[UserSettings.ADMIN]);
@@ -139,17 +164,21 @@ class SettingBloc extends Bloc{
   }
   
   void save() async{
-    settings.keys.forEach((key) {
-      if(settings[key]!=prevSettings[key]) {
-        print("changed:"+settings[key].toString());
-        UserSettingsRepository().setValue(key, settings[key]).then((_){
-          readCurrentSettings();
-        });
-      }
-    });
+
+    UserSettingsRepository().setTable(userSettings);
+//
+//    settings.keys.forEach((key) {
+//      if(settings[key]!=prevSettings[key]) {
+//        print("changed:"+settings[key].toString());
+//        UserSettingsRepository().setValue(key, settings[key]).then((_){
+//          readCurrentSettings();
+//        });
+//      }
+//    });
   }
 
   SettingBloc(){
+    userSettings = UserSettings();
     readCurrentSettings();
   }
 

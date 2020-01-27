@@ -73,4 +73,22 @@ class UserSettingsRepository {
     }
   }
 
+  Future<void> setTable(UserSettings settings) async{
+    final UserSettingsDatabaseProvider provider =
+    UserSettingsDatabaseProvider();
+    final Database database = await provider.database;
+    String table = Constants.DEFAULT_USER_SETTING_TABLE;
+
+    print(settings);
+
+    await database.delete(table).then((_){
+      print("******table deleter******");
+    });
+
+    await database.insert(table, settings.toJson()).then((_) {
+      print("******init user settings******");
+      return;
+    });
+  }
+
 }
