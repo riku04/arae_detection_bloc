@@ -32,8 +32,6 @@ class _SettingScreenState extends State<SettingScreen> {
         actions: <Widget>[
           FlatButton(
             child: Text("保存",style: TextStyle(color: Colors.white),),
-//            splashColor: Colors.transparent,
-//            highlightColor: Colors.transparent,
             onPressed: (){
               print("setting save pressed");
               blocSetting.save();
@@ -269,10 +267,8 @@ class _SettingScreenState extends State<SettingScreen> {
                                   value: vibrationOn,
                                   onChanged: (bool){
                                     if(bool){
-                                      //blocSetting.closeAlertOn.add(1);
                                       blocSetting.settings.update(UserSettings.VIBRATION_ON, (value) => 1);
                                     }else{
-                                      //blocSetting.closeAlertOn.add(0);
                                       blocSetting.settings.update(UserSettings.VIBRATION_ON, (value) => 0);
                                     }
                                   },
@@ -354,10 +350,8 @@ class _SettingScreenState extends State<SettingScreen> {
                                   value: loggingOn,
                                   onChanged: (bool){
                                     if(bool){
-                                      //blocSetting.closeAlertOn.add(1);
                                       blocSetting.settings.update(UserSettings.LOGGING_ON, (value) => 1);
                                     }else{
-                                      //blocSetting.closeAlertOn.add(0);
                                       blocSetting.settings.update(UserSettings.LOGGING_ON, (value) => 0);
                                     }
                                   },
