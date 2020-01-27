@@ -51,14 +51,26 @@ class UserSettingsRepository {
     }
   }
 
-  Future<void> setValue(String column, String value)async{
-    String table = Constants.DEFAULT_USER_SETTING_TABLE;
-    final UserSettingsDatabaseProvider provider =
-    UserSettingsDatabaseProvider();
-    final Database database = await provider.database;
-    await database.rawUpdate("UPDATE $table SET $column = ?",["$value"]).then((_){
-      print("******update user settings******");
-    });
+  Future<bool> setValue(String column, dynamic value) async{
+    if(value is String||value is int||value is bool){
+      if(value is bool){
+        if(value){
+          value = 1;
+        }else{
+          value = 0;
+        }
+      }
+      String table = Constants.DEFAULT_USER_SETTING_TABLE;
+      final UserSettingsDatabaseProvider provider =
+      UserSettingsDatabaseProvider();
+      final Database database = await provider.database;
+      await database.rawUpdate("UPDATE $table SET $column = ?", ["$value"])
+          .then((_) {
+            print("******update user settings******");
+          });
+    } else {
+      print("user setting set value error, invalid Type");
+    }
   }
 
 }

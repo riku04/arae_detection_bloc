@@ -1,11 +1,33 @@
-enum Parameter{
-  USER_ID,
-  GROUP_ID,
-  ADMIN,
-  ENTER_ALERT_ON
-}
 
 class UserSettings {
+
+//  Map<String,dynamic> status = {
+//    USER_ID : "user_0",
+//    GROUP_ID : "group_0",
+//    ADMIN : 0,
+//    ENTER_ALERT_ON : 1,
+//    CLOSE_ALERT_ON : 1,
+//    BEACON_ALERT_ON : 1,
+//    VIBRATION_ON : 1,
+//    LOGGING_ON : 1,
+//    START_HOUR : 9,
+//    START_MINUTE : 0,
+//    START_LUNCH_HOUR : 12,
+//    START_LUNCH_MINUTE : 0,
+//    END_LUNCH_HOUR : 13,
+//    END_LUNCH_MINUTE : 0,
+//    END_HOUR : 18,
+//    END_MINUTE : 0,
+//    CLOSE_DISTANCE_METER : 10,
+//    BEACON_CLOSE_DISTANCE_METER : 10,
+//    LOG_INTERVAL_SEC : 10,
+//    SEMI_CLOSE_LOG_INTERVAL_SEC : 5,
+//    CLOSE_LOG_INTERVAL_SEC : 3,
+//    ENTER_LOG_INTERVAL_SEC : 3,
+//    BEACON_LOG_INTERVAL_SEC : 3,
+//    BEACON_NAME_LIST_STRING : '',
+//  };
+
   static const String USER_ID = "USER_ID";
   static const String GROUP_ID = "GROUP_ID";
   static const String ADMIN = "ADMIN";
@@ -29,42 +51,42 @@ class UserSettings {
   static const String CLOSE_LOG_INTERVAL_SEC = 'CLOSE_LOG_INTERVAL_SEC';
   static const String ENTER_LOG_INTERVAL_SEC = 'ENTER_LOG_INTERVAL_SEC';
   static const String BEACON_LOG_INTERVAL_SEC = 'BEACON_LOG_INTERVAL_SEC';
-  static const String BEACON_NAME = 'BEACON_NAME';
+  static const String BEACON_NAME_LIST_STRING = 'BEACON_NAME';
 
-  final String userId;
-  final String groupId;
-  final bool admin;
-  final bool enterAlertOn;
-  final bool closeAlertOn;
-  final bool beaconAlertOn;
-  final bool vibrationOn;
-  final bool loggingOn;
-  final int startHour;
-  final int startMinute;
-  final int startLunchHour;
-  final int startLunchMinute;
-  final int endLunchHour;
-  final int endLunchMinute;
-  final int endHour;
-  final int endMinute;
-  final int closeDistanceMeter;
-  final int beaconCloseDistanceMeter;
-  final int logIntervalSec;
-  final int semiCloseLogIntervalSec;
-  final int closeLogIntervalSec;
-  final int enterLogIntervalSec;
-  final int beaconLogIntervalSec;
-  final String beaconNameListString;
+   String userId;
+   String groupId;
+   int admin;
+   int enterAlertOn;
+   int closeAlertOn;
+   int beaconAlertOn;
+   int vibrationOn;
+   int loggingOn;
+   int startHour;
+   int startMinute;
+   int startLunchHour;
+   int startLunchMinute;
+   int endLunchHour;
+   int endLunchMinute;
+   int endHour;
+   int endMinute;
+   int closeDistanceMeter;
+   int beaconCloseDistanceMeter;
+   int logIntervalSec;
+   int semiCloseLogIntervalSec;
+   int closeLogIntervalSec;
+   int enterLogIntervalSec;
+   int beaconLogIntervalSec;
+   String beaconNameListString;
 
   UserSettings({
-    this.userId = "user",
-    this.groupId = "group",
-    this.admin = false,
-    this.enterAlertOn = true,
-    this.closeAlertOn = true,
-    this.beaconAlertOn = true,
-    this.vibrationOn = true,
-    this.loggingOn = true,
+    this.userId = "user_default",
+    this.groupId = "group_default",
+    this.admin = 0,
+    this.enterAlertOn = 1,
+    this.closeAlertOn = 1,
+    this.beaconAlertOn = 1,
+    this.vibrationOn = 1,
+    this.loggingOn = 1,
     this.startHour = 9,
     this.startMinute = 0,
     this.startLunchHour = 12,
@@ -107,7 +129,7 @@ class UserSettings {
         closeLogIntervalSec = json[CLOSE_LOG_INTERVAL_SEC],
         enterLogIntervalSec = json[ENTER_LOG_INTERVAL_SEC],
         beaconLogIntervalSec = json[BEACON_LOG_INTERVAL_SEC],
-        beaconNameListString = json[BEACON_NAME];
+        beaconNameListString = json[BEACON_NAME_LIST_STRING];
 
   Map<String, dynamic> toJson() => {
         USER_ID:userId,
@@ -133,7 +155,7 @@ class UserSettings {
         CLOSE_LOG_INTERVAL_SEC:closeLogIntervalSec,
         ENTER_LOG_INTERVAL_SEC:enterLogIntervalSec,
         BEACON_LOG_INTERVAL_SEC:beaconLogIntervalSec,
-        BEACON_NAME:beaconNameListString,
+        BEACON_NAME_LIST_STRING:beaconNameListString,
       };
 
 
