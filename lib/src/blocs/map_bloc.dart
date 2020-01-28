@@ -14,6 +14,8 @@ import 'package:latlong/latlong.dart';
 import 'package:vibration/vibration.dart';
 
 class MapBloc extends Bloc {
+  AreaRepository repository;
+  
   Logger _logger;
 
   List<Marker> _draftMarkers; //下書きポリゴンのマーカー
@@ -127,9 +129,9 @@ class MapBloc extends Bloc {
   }
 
   Future<void> removeAreaByAreaName(String areaName) async {
-    await AreaRepository().getTableList().then((list) {
+    await repository.getTableList().then((list) {
       if (list.contains(areaName)) {
-        AreaRepository().removeTable(areaName).then((_) {
+        repository.removeTable(areaName).then((_) {
           print("$areaName:removed");
           return;
         });
@@ -141,18 +143,18 @@ class MapBloc extends Bloc {
   }
 
   void saveCurrentArea(String tableName) async {
-    AreaRepository().getTableList().then((areaList) {
+    repository.getTableList().then((areaList) {
       if (areaList.contains(tableName)) {
         print("table name is already exist");
         return;
       } else {
-        AreaRepository().createNewTable(tableName).then((_) {
+        repository.createNewTable(tableName).then((_) {
           _polygons.forEach((polygon) {
             Area area =
                 Area(areaPointsStr: Helper.pointsToString(polygon.points));
             //area.areaPointsStr = Area.pointsToString(polygon.points);
             print(polygon.points.toString());
-            AreaRepository().addDataToTable(tableName, area);
+            repository.addDataToTable(tableName, area);
           });
         });
       }
@@ -160,7 +162,7 @@ class MapBloc extends Bloc {
   }
 
   void readSavedArea(String tableName) async {
-    AreaRepository().getPointsListByTableName(tableName).then((areaList) {
+    repository.getPointsListByTableName(tableName).then((areaList) {
       if (areaList.isEmpty) {
         return;
       }
@@ -207,7 +209,9 @@ class MapBloc extends Bloc {
     return (depth & 1) == 1;
   }
 
-  MapBloc()  {
+  MapBloc(AreaRepository repository)  {
+    this.repository = repository;
+    
     _draftMarkers = new List();
     _logMarkers = new List();
     _draftPolygons = new List();
@@ -215,7 +219,7 @@ class MapBloc extends Bloc {
     _expandedPolygons = new List();
     _moreExpandedPolygons = new List();
 
-    _logger = Logger(_polygons);
+    //_logger = Logger(_polygons);
 
     onAddPoint.listen((point) {
       double latitude = double.parse(point.latitude.toStringAsFixed(7));

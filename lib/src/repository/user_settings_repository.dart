@@ -5,24 +5,6 @@ import 'package:sqflite/sqflite.dart';
 
 class UserSettingsRepository {
 
-  Future<List<String>> getTableList() async {
-    final UserSettingsDatabaseProvider provider =
-        UserSettingsDatabaseProvider();
-    final Database database = await provider.database;
-    return await database
-        .rawQuery("SELECT name FROM sqlite_master WHERE type='table'")
-        .then((list) {
-      List<String> tables = List();
-      list.forEach((map) {
-        map.keys.forEach((key) {
-          print(map[key]);
-          tables.add(map[key]);
-        });
-      });
-      return tables;
-    });
-  }
-
   Future<void> initData() async {
     final UserSettingsDatabaseProvider provider =
     UserSettingsDatabaseProvider();
@@ -35,10 +17,9 @@ class UserSettingsRepository {
     });
   }
 
-  Future<Map<String,dynamic>> getValues() async{
+  Future<Map<String,dynamic>> getTableData() async{
     String table = Constants.DEFAULT_USER_SETTING_TABLE;
-    final UserSettingsDatabaseProvider provider =
-    UserSettingsDatabaseProvider();
+    final UserSettingsDatabaseProvider provider = UserSettingsDatabaseProvider();
     final Database database = await provider.database;
 
     List list = await database.rawQuery("SELECT * FROM $table");
@@ -51,14 +32,12 @@ class UserSettingsRepository {
     }
   }
 
-  Future<void> setValue(String column, String value)async{
-    String table = Constants.DEFAULT_USER_SETTING_TABLE;
+  Future<void> setTableData(UserSettings settings) async{
     final UserSettingsDatabaseProvider provider =
     UserSettingsDatabaseProvider();
     final Database database = await provider.database;
-    await database.rawUpdate("UPDATE $table SET $column = ?",["$value"]).then((_){
-      print("******update user settings******");
-    });
+    String table = Constants.DEFAULT_USER_SETTING_TABLE;
+    print(settings);
+    await database.update(table, settings.toJson());
   }
-
 }

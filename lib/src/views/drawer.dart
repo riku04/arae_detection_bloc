@@ -129,6 +129,18 @@ class _MainDrawerState extends State<MainDrawer> {
               Navigator.pushNamed(context, '/ble-scan-screen');
             },
           ),
+          FlatButton(
+            child: Row(children: [
+              SpaceBox(width: 16),
+              Icon(Icons.settings),
+              SpaceBox(width: 64),
+              Text("SETTING")
+            ]),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.pushNamed(context, '/setting-screen');
+            },
+          ),
         ],
       ),
     );

@@ -4,17 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map_app/src/blocs/ble_scan_bloc.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:flutter_map_app/src/blocs/read_area_bloc.dart';
+import 'package:flutter_map_app/src/blocs/setting_bloc.dart';
+import 'package:flutter_map_app/src/repository/area_repository.dart';
+import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/views/ble_scan_screen.dart';
 import 'package:flutter_map_app/src/views/drawer.dart';
 import 'package:flutter_map_app/src/views/map_screen.dart';
 import 'package:flutter_map_app/src/views/read_area_screen.dart';
+import 'package:flutter_map_app/src/views/setting_screen.dart';
 import 'package:flutter_map_app/src/views/splash_screen.dart';
 
 class App extends StatelessWidget {
   @override
   build(BuildContext context) {
     return BlocProvider<MapBloc>(
-      creator: (context, _bag) => MapBloc(),
+      creator: (context, _bag) => MapBloc(AreaRepository()),
       child: MaterialApp(
         home: SafeArea(
           child: Scaffold(
@@ -35,6 +39,12 @@ class App extends StatelessWidget {
                 creator: (context, _bag) => BleScanBloc(),
                 child: BleScanScreen(),
               ),
+          '/setting-screen':(BuildContext context) =>
+              BlocProvider<SettingBloc>(
+                creator: (context, _bag) => SettingBloc(UserSettingsRepository()),
+                child: SettingScreen(),
+              )
+          ,
         },
       ),
     );
