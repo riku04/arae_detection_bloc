@@ -1,13 +1,18 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
+import 'package:flutter_map_app/src/mocks/mock_area_repository.dart';
+import 'package:flutter_map_app/src/repository/area_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong/latlong.dart';
 
 void main() {
+
+  WidgetsFlutterBinding.ensureInitialized();
   group("MapBloc", () {
     MapBloc bloc;
     setUp(() {
-      bloc = MapBloc();
+      bloc = MapBloc(MockAreaRepository());
     });
 
     Polygon polygon = Polygon(points: [
@@ -16,6 +21,7 @@ void main() {
       LatLng(4.0, 4.0),
       LatLng(4.0, 0.0)
     ]);
+
 
     test("polygonContainsPoint(Polygon, LatLng) expect true", () {
       LatLng point = LatLng(2.0, 2.0);

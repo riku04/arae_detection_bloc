@@ -5,24 +5,6 @@ import 'package:sqflite/sqflite.dart';
 
 class UserSettingsRepository {
 
-  Future<List<String>> getTableList() async {
-    final UserSettingsDatabaseProvider provider =
-        UserSettingsDatabaseProvider();
-    final Database database = await provider.database;
-    return await database
-        .rawQuery("SELECT name FROM sqlite_master WHERE type='table'")
-        .then((list) {
-      List<String> tables = List();
-      list.forEach((map) {
-        map.keys.forEach((key) {
-          print(map[key]);
-          tables.add(map[key]);
-        });
-      });
-      return tables;
-    });
-  }
-
   Future<void> initData() async {
     final UserSettingsDatabaseProvider provider =
     UserSettingsDatabaseProvider();
@@ -35,10 +17,9 @@ class UserSettingsRepository {
     });
   }
 
-  Future<Map<String,dynamic>> getValues() async{
+  Future<Map<String,dynamic>> getTableData() async{
     String table = Constants.DEFAULT_USER_SETTING_TABLE;
-    final UserSettingsDatabaseProvider provider =
-    UserSettingsDatabaseProvider();
+    final UserSettingsDatabaseProvider provider = UserSettingsDatabaseProvider();
     final Database database = await provider.database;
 
     List list = await database.rawQuery("SELECT * FROM $table");
@@ -51,44 +32,12 @@ class UserSettingsRepository {
     }
   }
 
-  Future<bool> setValue(String column, dynamic value) async{
-    if(value is String||value is int||value is bool){
-      if(value is bool){
-        if(value){
-          value = 1;
-        }else{
-          value = 0;
-        }
-      }
-      String table = Constants.DEFAULT_USER_SETTING_TABLE;
-      final UserSettingsDatabaseProvider provider =
-      UserSettingsDatabaseProvider();
-      final Database database = await provider.database;
-      await database.rawUpdate("UPDATE $table SET $column = ?", ["$value"])
-          .then((_) {
-            print("******update user settings******");
-          });
-    } else {
-      print("user setting set value error, invalid Type");
-    }
-  }
-
-  Future<void> setTable(UserSettings settings) async{
+  Future<void> setTableData(UserSettings settings) async{
     final UserSettingsDatabaseProvider provider =
     UserSettingsDatabaseProvider();
     final Database database = await provider.database;
     String table = Constants.DEFAULT_USER_SETTING_TABLE;
-
     print(settings);
-
-    await database.delete(table).then((_){
-      print("******table deleter******");
-    });
-
-    await database.insert(table, settings.toJson()).then((_) {
-      print("******init user settings******");
-      return;
-    });
+    await database.update(table, settings.toJson());
   }
-
 }

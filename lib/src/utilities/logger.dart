@@ -37,7 +37,7 @@ class Logger{
     if(!exists){
       print("[$path] doesn't exist, initializing...");
       print("this log contains [${polygons.length}] polygons");
-      Map<String, dynamic> us = await UserSettingsRepository().getValues();
+      Map<String, dynamic> us = await UserSettingsRepository().getTableData();
       await file.writeAsString("Approach Distance[m]"+"\n",mode: FileMode.append,flush: true);
       await file.writeAsString("${us[UserSettings.CLOSE_DISTANCE_METER]}"+"\n",mode: FileMode.append,flush: true);
       await file.writeAsString("Area Coordinates[deg.]"+"\n",mode: FileMode.append,flush: true);

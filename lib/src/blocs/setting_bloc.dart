@@ -6,10 +6,83 @@ import 'package:flutter_map_app/src/models/user_settings.dart';
 import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 
 class SettingBloc extends Bloc{
-  Map<String,dynamic> prevSettings;
-  Map<String,dynamic> settings;
+  UserSettingsRepository _repository;
 
-  UserSettings userSettings;
+  Map<String,dynamic> _settings; //DBから読み出したパラメータ
+  UserSettings _tempUserSettings; //変更後のパラメータ
+
+  void setTempUserId(String userId){
+    _tempUserSettings.userId = userId;
+  }
+  void setTempGroupId(String groupId){
+    _tempUserSettings.groupId = groupId;
+  }
+  void setTempAdmin(int hasAdmin){
+    _tempUserSettings.admin = hasAdmin;
+  }
+  void setTempEnterAlertOn(int isEnterAlertOn){
+    _tempUserSettings.enterAlertOn = isEnterAlertOn;
+  }
+  void setTempCloseAlertOn(int isCloseAlertOn){
+    _tempUserSettings.closeAlertOn = isCloseAlertOn;
+  }
+  void setTempBeaconAlertOn(int isBeaconAlertOn){
+    _tempUserSettings.beaconAlertOn = isBeaconAlertOn;
+  }
+  void setTempVibrationOn(int isVibrationOn){
+    _tempUserSettings.vibrationOn = isVibrationOn;
+  }
+  void setTempLoggingOn(int isLoggingOn){
+    _tempUserSettings.loggingOn = isLoggingOn;
+  }
+  void setTempStartHour(int startHour){
+    _tempUserSettings.startHour = startHour;
+  }
+  void setTempStartMinute(int startMinute){
+    _tempUserSettings.startMinute = startMinute;
+  }
+  void setTempEndHour(int endHour){
+    _tempUserSettings.endHour = endHour;
+  }
+  void setTempEndMinute(int endMinute){
+    _tempUserSettings.endMinute = endMinute;
+  }
+  void setTempStartLunchHour(int startLunchHour){
+    _tempUserSettings.startLunchHour = startLunchHour;
+  }
+  void setTempStartLunchMinute(int startLunchMinute){
+    _tempUserSettings.startLunchMinute = startLunchMinute;
+  }
+  void setTempEndLunchHour(int endLunchHour){
+    _tempUserSettings.endLunchHour = endLunchHour;
+  }
+  void setTempEndLunchMinute(int endLunchMinute){
+    _tempUserSettings.endLunchMinute = endLunchMinute;
+  }
+  void setTempCloseDistanceMeter(int closeDistanceMeter){
+    _tempUserSettings.closeDistanceMeter = closeDistanceMeter;
+  }
+  void setTempBeaconCloseDistanceMeter(int beaconCloseDistanceMeter){
+    _tempUserSettings.beaconCloseDistanceMeter = beaconCloseDistanceMeter;
+  }
+  void setTempLogIntervalSec(int logIntervalSec){
+    _tempUserSettings.logIntervalSec = logIntervalSec;
+  }
+  void setTempSemiCloseLogIntervalSec(int semiCloseLogIntervalSec){
+    _tempUserSettings.semiCloseLogIntervalSec = semiCloseLogIntervalSec;
+  }
+  void setTempCloseLogIntervalSec(int closeLogIntervalSec){
+    _tempUserSettings.closeLogIntervalSec = closeLogIntervalSec;
+  }
+  void setTempEnterLogIntervalSec(int enterLogIntervalSec){
+    _tempUserSettings.enterLogIntervalSec = enterLogIntervalSec;
+  }
+  void setTempBeaconLogIntervalSec(int beaconLogIntervalSec){
+    _tempUserSettings.beaconLogIntervalSec = beaconLogIntervalSec;
+  }
+  void setTempBeaconNameListString(String beaconNameListString){
+    _tempUserSettings.beaconNameListString = beaconNameListString;
+  }
 
   final _userIdController = StreamController<String>();
   Sink<String> get userId => _userIdController.sink;
@@ -108,77 +181,76 @@ class SettingBloc extends Bloc{
   Stream<String> get onBeaconNameListString => _beaconNameListStringController.stream;
 
   void readCurrentSettings() async{
-    settings = Map.from(await UserSettingsRepository().getValues());
-    prevSettings = Map.from(settings);
+    _settings = Map.from(await _repository.getTableData());
 
-    userSettings.userId = (settings[UserSettings.USER_ID]);
-    userSettings.groupId = (settings[UserSettings.GROUP_ID]);
-    userSettings.admin = (settings[UserSettings.ADMIN]);
-    userSettings.enterAlertOn = (settings[UserSettings.ENTER_ALERT_ON]);
-    userSettings.closeAlertOn = (settings[UserSettings.CLOSE_ALERT_ON]);
-    userSettings.beaconAlertOn = (settings[UserSettings.BEACON_ALERT_ON]);
-    userSettings.vibrationOn = (settings[UserSettings.VIBRATION_ON]);
-    userSettings.loggingOn = (settings[UserSettings.LOGGING_ON]);
-    userSettings.startHour = (settings[UserSettings.START_HOUR]);
-    userSettings.startMinute = (settings[UserSettings.START_MINUTE]);
-    userSettings.startLunchHour = (settings[UserSettings.START_LUNCH_HOUR]);
-    userSettings.startLunchMinute = (settings[UserSettings.START_LUNCH_MINUTE]);
-    userSettings.endLunchHour = (settings[UserSettings.END_LUNCH_HOUR]);
-    userSettings.endLunchMinute = (settings[UserSettings.END_LUNCH_MINUTE]);
-    userSettings.endHour = (settings[UserSettings.END_HOUR]);
-    userSettings.endMinute = (settings[UserSettings.END_MINUTE]);
-    userSettings.closeDistanceMeter = (settings[UserSettings.CLOSE_DISTANCE_METER]);
-    userSettings.beaconCloseDistanceMeter = (settings[UserSettings.BEACON_CLOSE_DISTANCE_METER]);
-    userSettings.logIntervalSec = (settings[UserSettings.LOG_INTERVAL_SEC]);
-    userSettings.semiCloseLogIntervalSec = (settings[UserSettings.SEMI_CLOSE_LOG_INTERVAL_SEC]);
-    userSettings.closeLogIntervalSec = (settings[UserSettings.CLOSE_LOG_INTERVAL_SEC]);
-    userSettings.enterLogIntervalSec = (settings[UserSettings.ENTER_LOG_INTERVAL_SEC]);
-    userSettings.beaconLogIntervalSec = (settings[UserSettings.BEACON_LOG_INTERVAL_SEC]);
-    userSettings.beaconNameListString = (settings[UserSettings.BEACON_NAME_LIST_STRING]);
+    setTempUserId(_settings[UserSettings.USER_ID]);
+    setTempGroupId(_settings[UserSettings.GROUP_ID]);
+    setTempAdmin(_settings[UserSettings.ADMIN]);
+    setTempEnterAlertOn(_settings[UserSettings.ENTER_ALERT_ON]);
+    setTempCloseAlertOn(_settings[UserSettings.CLOSE_ALERT_ON]);
+    setTempBeaconAlertOn(_settings[UserSettings.BEACON_ALERT_ON]);
+    setTempVibrationOn(_settings[UserSettings.VIBRATION_ON]);
+    setTempLoggingOn(_settings[UserSettings.LOGGING_ON]);
+    setTempStartHour(_settings[UserSettings.START_HOUR]);
+    setTempStartMinute(_settings[UserSettings.START_MINUTE]);
+    setTempStartLunchHour(_settings[UserSettings.START_LUNCH_HOUR]);
+    setTempStartLunchMinute(_settings[UserSettings.START_LUNCH_MINUTE]);
+    setTempEndLunchHour(_settings[UserSettings.END_LUNCH_HOUR]);
+    setTempEndLunchMinute(_settings[UserSettings.END_LUNCH_MINUTE]);
+    setTempEndHour(_settings[UserSettings.END_HOUR]);
+    setTempEndMinute(_settings[UserSettings.END_MINUTE]);
+    setTempCloseDistanceMeter(_settings[UserSettings.CLOSE_DISTANCE_METER]);
+    setTempCloseLogIntervalSec(_settings[UserSettings.BEACON_CLOSE_DISTANCE_METER]);
+    setTempLogIntervalSec(_settings[UserSettings.LOG_INTERVAL_SEC]);
+    setTempSemiCloseLogIntervalSec(_settings[UserSettings.SEMI_CLOSE_LOG_INTERVAL_SEC]);
+    setTempCloseLogIntervalSec(_settings[UserSettings.CLOSE_LOG_INTERVAL_SEC]);
+    setTempEnterLogIntervalSec(_settings[UserSettings.ENTER_LOG_INTERVAL_SEC]);
+    setTempBeaconLogIntervalSec(_settings[UserSettings.BEACON_LOG_INTERVAL_SEC]);
+    setTempBeaconNameListString(_settings[UserSettings.BEACON_NAME_LIST_STRING]);
     
-    userId.add(settings[UserSettings.USER_ID]);
-    groupId.add(settings[UserSettings.GROUP_ID]);
-    admin.add(settings[UserSettings.ADMIN]);
-    enterAlertOn.add(settings[UserSettings.ENTER_ALERT_ON]);
-    closeAlertOn.add(settings[UserSettings.CLOSE_ALERT_ON]);
-    beaconAlertOn.add(settings[UserSettings.BEACON_ALERT_ON]);
-    vibrationOn.add(settings[UserSettings.VIBRATION_ON]);
-    loggingOn.add(settings[UserSettings.LOGGING_ON]);
-    startHour.add(settings[UserSettings.START_HOUR]);
-    startMinute.add(settings[UserSettings.START_MINUTE]);
-    startLunchHour.add(settings[UserSettings.START_LUNCH_HOUR]);
-    startLunchMinute.add(settings[UserSettings.START_LUNCH_MINUTE]);
-    endLunchHour.add(settings[UserSettings.END_LUNCH_HOUR]);
-    endLunchMinute.add(settings[UserSettings.END_LUNCH_MINUTE]);
-    endHour.add(settings[UserSettings.END_HOUR]);
-    endMinute.add(settings[UserSettings.END_MINUTE]);
-    closeDistanceMeter.add(settings[UserSettings.CLOSE_DISTANCE_METER]);
-    beaconCloseDistanceMeter.add(settings[UserSettings.BEACON_CLOSE_DISTANCE_METER]);
-    logIntervalSec.add(settings[UserSettings.LOG_INTERVAL_SEC]);
-    semiCloseLogIntervalSec.add(settings[UserSettings.SEMI_CLOSE_LOG_INTERVAL_SEC]);
-    closeLogIntervalSec.add(settings[UserSettings.CLOSE_LOG_INTERVAL_SEC]);
-    enterLogIntervalSec.add(settings[UserSettings.ENTER_LOG_INTERVAL_SEC]);
-    beaconLogIntervalSec.add(settings[UserSettings.BEACON_LOG_INTERVAL_SEC]);
-    beaconNameListString.add(settings[UserSettings.BEACON_NAME_LIST_STRING]);
-
+    userId.add(_settings[UserSettings.USER_ID]);
+    groupId.add(_settings[UserSettings.GROUP_ID]);
+    admin.add(_settings[UserSettings.ADMIN]);
+    enterAlertOn.add(_settings[UserSettings.ENTER_ALERT_ON]);
+    closeAlertOn.add(_settings[UserSettings.CLOSE_ALERT_ON]);
+    beaconAlertOn.add(_settings[UserSettings.BEACON_ALERT_ON]);
+    vibrationOn.add(_settings[UserSettings.VIBRATION_ON]);
+    loggingOn.add(_settings[UserSettings.LOGGING_ON]);
+    startHour.add(_settings[UserSettings.START_HOUR]);
+    startMinute.add(_settings[UserSettings.START_MINUTE]);
+    startLunchHour.add(_settings[UserSettings.START_LUNCH_HOUR]);
+    startLunchMinute.add(_settings[UserSettings.START_LUNCH_MINUTE]);
+    endLunchHour.add(_settings[UserSettings.END_LUNCH_HOUR]);
+    endLunchMinute.add(_settings[UserSettings.END_LUNCH_MINUTE]);
+    endHour.add(_settings[UserSettings.END_HOUR]);
+    endMinute.add(_settings[UserSettings.END_MINUTE]);
+    closeDistanceMeter.add(_settings[UserSettings.CLOSE_DISTANCE_METER]);
+    beaconCloseDistanceMeter.add(_settings[UserSettings.BEACON_CLOSE_DISTANCE_METER]);
+    logIntervalSec.add(_settings[UserSettings.LOG_INTERVAL_SEC]);
+    semiCloseLogIntervalSec.add(_settings[UserSettings.SEMI_CLOSE_LOG_INTERVAL_SEC]);
+    closeLogIntervalSec.add(_settings[UserSettings.CLOSE_LOG_INTERVAL_SEC]);
+    enterLogIntervalSec.add(_settings[UserSettings.ENTER_LOG_INTERVAL_SEC]);
+    beaconLogIntervalSec.add(_settings[UserSettings.BEACON_LOG_INTERVAL_SEC]);
+    beaconNameListString.add(_settings[UserSettings.BEACON_NAME_LIST_STRING]);
   }
   
-  void save() async{
-
-    UserSettingsRepository().setTable(userSettings);
-//
-//    settings.keys.forEach((key) {
-//      if(settings[key]!=prevSettings[key]) {
-//        print("changed:"+settings[key].toString());
-//        UserSettingsRepository().setValue(key, settings[key]).then((_){
-//          readCurrentSettings();
-//        });
-//      }
-//    });
+  Future<void> save() async{
+    Map<String,dynamic> userSettingsMap = _tempUserSettings.toJson();
+    List<String> keys = userSettingsMap.keys.toList();
+    for(int i=0; i<= userSettingsMap.length-1; i++){
+      if(userSettingsMap[keys[i]]!=_settings[keys[i]]){
+        print("key:${keys[i]}");
+        print("new[${userSettingsMap[keys[i]].toString()}]!=[${_settings[keys[i]].toString()}]old");
+        await _repository.setTableData(_tempUserSettings);
+        _settings = _tempUserSettings.toJson();
+        return;
+      }
+    }
   }
 
-  SettingBloc(){
-    userSettings = UserSettings();
+  SettingBloc(UserSettingsRepository repository){
+    this._repository = repository;
+    _tempUserSettings = UserSettings();
     readCurrentSettings();
   }
 

@@ -1,4 +1,3 @@
-
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,7 +13,6 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
-
 
   @override
   void initState() {
@@ -59,16 +57,14 @@ class _SettingScreenState extends State<SettingScreen> {
                           width: 120,
                           child: StreamBuilder(
                             stream: blocSetting.onUserId,
-                            builder: (context,userIdSnapshot){
-                              print("data:"+userIdSnapshot.data.toString());
-                              if(userIdSnapshot.hasData) {
+                            builder: (context,snapshot){
+                              print("data:"+snapshot.data.toString());
+                              if(snapshot.hasData) {
                                 return TextFormField(
-                                  initialValue: userIdSnapshot.data,
-                                  onChanged: (value){
-                                    print(value);
-                                    blocSetting.settings[UserSettings.USER_ID] = value;
-                                    blocSetting.userSettings.userId = value;
-                                    print(blocSetting.settings[UserSettings.USER_ID]);
+                                  initialValue: snapshot.data,
+                                  onChanged: (string){
+                                    print(string);
+                                    blocSetting.setTempUserId(string);
                                   },
                                 );
                               }else{
@@ -99,10 +95,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                   initialValue: snapshot.data,
                                   onChanged: (string){
                                     print(string);
-                                    blocSetting.settings.update(UserSettings.GROUP_ID, (value) => string);
-                                    blocSetting.userSettings.groupId = string;
-                                    print(blocSetting.settings[UserSettings.GROUP_ID]);
-
+                                    blocSetting.setTempGroupId(string);
                                   },
                                 );
                               }else{
@@ -140,13 +133,13 @@ class _SettingScreenState extends State<SettingScreen> {
                                   value: admin,
                                   onChanged: (bool){
                                     if(bool){
-                                      //blocSetting.admin.add(1);
-                                      blocSetting.settings.update(UserSettings.ADMIN, (value) => 1);
-                                      blocSetting.userSettings.admin = 1;
-                                    }else{
-                                      //blocSetting.admin.add(0);
-                                      blocSetting.settings.update(UserSettings.ADMIN, (value) => 0);
-                                      blocSetting.userSettings.admin = 0;
+                                      blocSetting.setTempAdmin(1);
+                                      blocSetting.admin.add(1);//onChangeはvalueとの差分で判定されるので再生成しないと反応しなくなる
+                                      admin = true;
+                                    }else if(!bool){
+                                      blocSetting.setTempAdmin(0);
+                                      blocSetting.admin.add(0);
+                                      admin = false;
                                     }
                                   },
                                 );
@@ -191,13 +184,11 @@ class _SettingScreenState extends State<SettingScreen> {
                                   value: enterAlertOn,
                                   onChanged: (bool){
                                     if(bool){
-                                      //blocSetting.enterAlertOn.add(1);
-                                      blocSetting.settings.update(UserSettings.ENTER_ALERT_ON, (value) => 1);
-                                      blocSetting.userSettings.enterAlertOn = 1;
+                                      blocSetting.setTempEnterAlertOn(1);
+                                      blocSetting.enterAlertOn.add(1);
                                     }else{
-                                      //blocSetting.enterAlertOn.add(0);
-                                      blocSetting.settings.update(UserSettings.ENTER_ALERT_ON, (value) => 0);
-                                      blocSetting.userSettings.enterAlertOn = 0;
+                                      blocSetting.setTempEnterAlertOn(0);
+                                      blocSetting.enterAlertOn.add(0);
                                     }
                                   },
                                 );
@@ -233,13 +224,11 @@ class _SettingScreenState extends State<SettingScreen> {
                                   value: closeAlertOn,
                                   onChanged: (bool){
                                     if(bool){
-                                      //blocSetting.closeAlertOn.add(1);
-                                      blocSetting.settings.update(UserSettings.CLOSE_ALERT_ON, (value) => 1);
-                                      blocSetting.userSettings.closeAlertOn = 1;
+                                      blocSetting.setTempCloseAlertOn(1);
+                                      blocSetting.closeAlertOn.add(1);
                                     }else{
-                                      //blocSetting.closeAlertOn.add(0);
-                                      blocSetting.settings.update(UserSettings.CLOSE_ALERT_ON, (value) => 0);
-                                      blocSetting.userSettings.closeAlertOn = 0;
+                                      blocSetting.setTempCloseAlertOn(0);
+                                      blocSetting.closeAlertOn.add(0);
                                     }
                                   },
                                 );
@@ -275,11 +264,11 @@ class _SettingScreenState extends State<SettingScreen> {
                                   value: vibrationOn,
                                   onChanged: (bool){
                                     if(bool){
-                                      blocSetting.settings.update(UserSettings.VIBRATION_ON, (value) => 1);
-                                      blocSetting.userSettings.vibrationOn = 1;
+                                      blocSetting.setTempVibrationOn(1);
+                                      blocSetting.vibrationOn.add(1);
                                     }else{
-                                      blocSetting.settings.update(UserSettings.VIBRATION_ON, (value) => 0);
-                                      blocSetting.userSettings.vibrationOn = 0;
+                                      blocSetting.setTempVibrationOn(0);
+                                      blocSetting.vibrationOn.add(0);
                                     }
                                   },
                                 );
@@ -314,8 +303,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                       listViewWidth: 40,
                                       highlightSelectedValue: false,
                                       onChanged: (meter){
-                                        blocSetting.settings.update(UserSettings.CLOSE_DISTANCE_METER, (value) => meter-1);
-                                        blocSetting.userSettings.closeDistanceMeter = meter-1;
+                                        blocSetting.setTempCloseDistanceMeter(meter-1);
                                       }
                                   );
                                 }else{
@@ -361,11 +349,11 @@ class _SettingScreenState extends State<SettingScreen> {
                                   value: loggingOn,
                                   onChanged: (bool){
                                     if(bool){
-                                      blocSetting.settings.update(UserSettings.LOGGING_ON, (value) => 1);
-                                      blocSetting.userSettings.loggingOn = 1;
+                                      blocSetting.setTempLoggingOn(1);
+                                      blocSetting.loggingOn.add(1);
                                     }else{
-                                      blocSetting.settings.update(UserSettings.LOGGING_ON, (value) => 0);
-                                      blocSetting.userSettings.loggingOn = 0;
+                                      blocSetting.setTempLoggingOn(0);
+                                      blocSetting.loggingOn.add(0);
                                     }
                                   },
                                 );
@@ -401,8 +389,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                       highlightSelectedValue: false,
                                       onChanged: (hour){
                                         print("start hour :$hour");
-                                        blocSetting.settings.update(UserSettings.START_HOUR, (value) => hour-1);
-                                        blocSetting.userSettings.startHour = hour -1;
+                                        blocSetting.setTempStartHour(hour - 1);
                                       }
                                   );
                                 }else{
@@ -422,18 +409,14 @@ class _SettingScreenState extends State<SettingScreen> {
                                       listViewWidth: 40,
                                       highlightSelectedValue: false,
                                       onChanged: (minute){
-                                        blocSetting.settings.update(UserSettings.START_MINUTE, (value) => minute-1);
-                                        blocSetting.userSettings.startMinute = minute - 1;
+                                        blocSetting.setTempStartMinute(minute - 1);
                                       }
                                   );
                                 }else{
                                   return Container();
                                 }
-
                               },
                             ),
-
-
                           ],),
                         )
                       ],
@@ -462,14 +445,12 @@ class _SettingScreenState extends State<SettingScreen> {
                                       listViewWidth: 40,
                                       highlightSelectedValue: false,
                                       onChanged: (hour){
-                                        blocSetting.settings.update(UserSettings.END_HOUR, (value) => hour-1);
-                                        blocSetting.userSettings.endHour = hour - 1;
+                                        blocSetting.setTempEndHour(hour - 1);
                                       }
                                   );
                                 }else{
                                   return Container();
                                 }
-
                               },
                             ),
                             Text(":"),
@@ -484,8 +465,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                       listViewWidth: 40,
                                       highlightSelectedValue: false,
                                       onChanged: (minute){
-                                        blocSetting.settings.update(UserSettings.END_MINUTE, (value) => minute-1);
-                                        blocSetting.userSettings.endMinute = minute - 1;
+                                        blocSetting.setTempEndMinute(minute - 1);
                                       }
                                   );
                                 }else{
@@ -523,8 +503,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                       listViewWidth: 40,
                                       highlightSelectedValue: false,
                                       onChanged: (hour){
-                                        blocSetting.settings.update(UserSettings.START_LUNCH_HOUR, (value) => hour-1);
-                                        blocSetting.userSettings.startLunchHour = hour - 1;
+                                        blocSetting.setTempStartLunchHour(hour - 1);
                                       }
                                   );
                                 }else{
@@ -545,18 +524,14 @@ class _SettingScreenState extends State<SettingScreen> {
                                       listViewWidth: 40,
                                       highlightSelectedValue: false,
                                       onChanged: (minute){
-                                        blocSetting.settings.update(UserSettings.START_LUNCH_MINUTE, (value) => minute-1);
-                                        blocSetting.userSettings.startLunchMinute = minute - 1;
+                                        blocSetting.setTempStartLunchMinute(minute - 1);
                                       }
                                   );
                                 }else{
                                   return Container();
                                 }
-
                               },
                             ),
-
-
                           ],),
                         )
                       ],
@@ -585,8 +560,7 @@ class _SettingScreenState extends State<SettingScreen> {
                                       listViewWidth: 40,
                                       highlightSelectedValue: false,
                                       onChanged: (hour){
-                                        blocSetting.settings.update(UserSettings.END_LUNCH_HOUR, (value) => hour-1);
-                                        blocSetting.userSettings.endLunchHour = hour - 1;
+                                        blocSetting.setTempEndLunchHour(hour - 1);
                                       }
                                   );
                                 }else{
@@ -607,17 +581,14 @@ class _SettingScreenState extends State<SettingScreen> {
                                       listViewWidth: 40,
                                       highlightSelectedValue: false,
                                       onChanged: (minute){
-                                        blocSetting.settings.update(UserSettings.END_LUNCH_MINUTE, (value) => minute-1);
-                                        blocSetting.userSettings.endLunchMinute = minute - 1;
+                                        blocSetting.setTempEndLunchMinute(minute - 1);
                                       }
                                   );
                                 }else{
                                   return Container();
                                 }
-
                               },
                             ),
-
                           ],),
                         )
                       ],
@@ -628,7 +599,6 @@ class _SettingScreenState extends State<SettingScreen> {
             ),
           ],
         ),
-
       ),
     );
   }
