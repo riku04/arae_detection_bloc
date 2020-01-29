@@ -5,17 +5,22 @@ import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/utilities/helper.dart';
 import 'package:latlong/latlong.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
 
 class Logger{
-  String path;
+  String path="";
   List<Polygon> polygons;
   Map<String,dynamic> parameter;
 
   Future<void> initLogger(List<Polygon> polygons,Map<String,dynamic> parameter) async{
-    final directory = await getApplicationDocumentsDirectory();
-    final DateTime now = DateTime.now();
-    final filename = "${now.hour}:${now.minute}:${now.second}";
-    this.path = directory.path+"/"+filename+".csv";
+//    final directory = await getApplicationDocumentsDirectory();
+//    final DateTime now = DateTime.now();
+//    DateFormat formatter =  DateFormat("yyyyMMddhhmmss");
+//    String formatted = formatter.format(now);
+//    var filename = formatted;
+//    this.path = directory.path+"/"+filename+".csv";
+
+    this.path = "";
     this.polygons = polygons;
     this.parameter = parameter;
     print("logger status \npolygons:[${polygons.length}]\nUserSettings[${parameter.toString()}]");
@@ -24,6 +29,16 @@ class Logger{
   }
 
   Future<void> addLog(DateTime dateTime,LatLng point,int status) async{
+
+    if(path==""){
+      final directory = await getApplicationDocumentsDirectory();
+      final DateTime now = DateTime.now();
+      DateFormat formatter =  DateFormat("yyyyMMddhhmmss");
+      String formatted = formatter.format(now);
+      var filename = formatted;
+      this.path = directory.path+"/"+filename+".csv";
+    }
+
     final file = File(path);
     bool exists = await file.exists();
 
