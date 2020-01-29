@@ -2,6 +2,7 @@ import 'package:bloc_provider/bloc_provider.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:flutter_map_app/src/blocs/setting_bloc.dart';
 import 'package:flutter_map_app/src/models/user_settings.dart';
 import 'package:flutter_map_app/src/widgets/space_box.dart';
@@ -22,6 +23,7 @@ class _SettingScreenState extends State<SettingScreen> {
 
   @override
    build(BuildContext context){
+    final mapBloc = BlocProvider.of<MapBloc>(context);
     final blocSetting = BlocProvider.of<SettingBloc>(context);
 
     return SafeArea(
@@ -32,7 +34,9 @@ class _SettingScreenState extends State<SettingScreen> {
             child: Text("保存",style: TextStyle(color: Colors.white),),
             onPressed: (){
               print("setting save pressed");
-              blocSetting.save();
+              blocSetting.save().then((settings){
+                mapBloc.settings.add(settings);
+              });
             },
           )
         ],),

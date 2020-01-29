@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/models/area.dart';
+import 'package:flutter_map_app/src/models/user_settings.dart';
 import 'package:flutter_map_app/src/repository/area_repository.dart';
 import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
@@ -14,7 +15,8 @@ import 'package:latlong/latlong.dart';
 import 'package:vibration/vibration.dart';
 
 class MapBloc extends Bloc {
-  AreaRepository repository;
+  AreaRepository _areaRepository;
+  UserSettingsRepository _userSettingsRepository;
   
   Logger _logger;
 
@@ -47,10 +49,13 @@ class MapBloc extends Bloc {
   Sink<List<LayerOptions>> get setLayers => _layersController.sink;
   Stream<List<LayerOptions>> get onLayersChanged => _layersController.stream;
 
-  final _currentLocationController =
-      StreamController<LatLng>.broadcast(); //>>isInside,addLog
+  final _currentLocationController = StreamController<LatLng>.broadcast(); //>>isInside,addLog
   Sink<LatLng> get addCurrentLocation => _currentLocationController.sink;
   Stream<LatLng> get onCurrentLocationChanged => _currentLocationController.stream;
+
+  final _userSettingsController = StreamController<Map<String,dynamic>>();
+  Sink<Map<String,dynamic>> get settings => _userSettingsController.sink;
+  Stream<Map<String,dynamic>> get onSettingsChanged => _userSettingsController.stream;
 
   void initMapOptions() {
     MapOptions _mapOptions = new MapOptions(
@@ -113,8 +118,7 @@ class MapBloc extends Bloc {
         borderStrokeWidth: 1.0));
     print("determined");
     setLayers.add(layers);
-
-    _logger = Logger(_polygons);
+    setLogger();
 
     _draftMarkers.clear();
     _draftPolygons.clear();
@@ -122,6 +126,7 @@ class MapBloc extends Bloc {
 
   void removeAllPolygons() {
     _polygons.clear();
+    setLogger();
     _draftPolygons.clear();
     _draftMarkers.clear();
     _logMarkers.clear();
@@ -129,9 +134,9 @@ class MapBloc extends Bloc {
   }
 
   Future<void> removeAreaByAreaName(String areaName) async {
-    await repository.getTableList().then((list) {
+    await _areaRepository.getTableList().then((list) {
       if (list.contains(areaName)) {
-        repository.removeTable(areaName).then((_) {
+        _areaRepository.removeTable(areaName).then((_) {
           print("$areaName:removed");
           return;
         });
@@ -143,18 +148,18 @@ class MapBloc extends Bloc {
   }
 
   void saveCurrentArea(String tableName) async {
-    repository.getTableList().then((areaList) {
+    _areaRepository.getTableList().then((areaList) {
       if (areaList.contains(tableName)) {
         print("table name is already exist");
         return;
       } else {
-        repository.createNewTable(tableName).then((_) {
+        _areaRepository.createNewTable(tableName).then((_) {
           _polygons.forEach((polygon) {
             Area area =
                 Area(areaPointsStr: Helper.pointsToString(polygon.points));
             //area.areaPointsStr = Area.pointsToString(polygon.points);
             print(polygon.points.toString());
-            repository.addDataToTable(tableName, area);
+            _areaRepository.addDataToTable(tableName, area);
           });
         });
       }
@@ -162,7 +167,7 @@ class MapBloc extends Bloc {
   }
 
   void readSavedArea(String tableName) async {
-    repository.getPointsListByTableName(tableName).then((areaList) {
+    _areaRepository.getPointsListByTableName(tableName).then((areaList) {
       if (areaList.isEmpty) {
         return;
       }
@@ -209,8 +214,15 @@ class MapBloc extends Bloc {
     return (depth & 1) == 1;
   }
 
-  MapBloc(AreaRepository repository)  {
-    this.repository = repository;
+  //when userSettings or polygons changed call this to refresh the logger
+  void setLogger()async{
+    await _logger.initLogger(_polygons,await _userSettingsRepository.getTableData());
+    print("logger refreshed");
+  }
+
+  MapBloc(AreaRepository areaRepository,UserSettingsRepository userSettingsRepository)  {
+    this._areaRepository = areaRepository;
+    this._userSettingsRepository = userSettingsRepository;
     
     _draftMarkers = new List();
     _logMarkers = new List();
@@ -219,7 +231,12 @@ class MapBloc extends Bloc {
     _expandedPolygons = new List();
     _moreExpandedPolygons = new List();
 
-    //_logger = Logger(_polygons);
+    _logger = Logger();
+    setLogger();
+    onSettingsChanged.listen((settings) {
+      print("settings changed");
+      setLogger();
+    });
 
     onAddPoint.listen((point) {
       double latitude = double.parse(point.latitude.toStringAsFixed(7));
@@ -251,11 +268,11 @@ class MapBloc extends Bloc {
     onCurrentLocationChanged.listen((point) async {
       await _logger.addLog(DateTime.now(), point, 0);
       List<String> lines = await _logger.readLines();
-      print("************");
+      //print("************");
 //      lines.forEach((line) {
 //        print(line);
 //      });
-      print("************");
+      //print("************");
 
       bool result = false;
       _polygons.forEach((polygon) {
@@ -301,5 +318,6 @@ class MapBloc extends Bloc {
     _optionsController.close();
     _addPointController.close();
     _currentLocationController.close();
+    _userSettingsController.close();
   }
 }

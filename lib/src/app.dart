@@ -17,8 +17,10 @@ import 'package:flutter_map_app/src/views/splash_screen.dart';
 class App extends StatelessWidget {
   @override
   build(BuildContext context) {
+    AreaRepository areaRepository = AreaRepository();
+    UserSettingsRepository userSettingsRepository = UserSettingsRepository();
     return BlocProvider<MapBloc>(
-      creator: (context, _bag) => MapBloc(AreaRepository()),
+      creator: (context, _bag) => MapBloc(areaRepository,userSettingsRepository),
       child: MaterialApp(
         home: SafeArea(
           child: Scaffold(
@@ -41,7 +43,7 @@ class App extends StatelessWidget {
               ),
           '/setting-screen':(BuildContext context) =>
               BlocProvider<SettingBloc>(
-                creator: (context, _bag) => SettingBloc(UserSettingsRepository()),
+                creator: (context, _bag) => SettingBloc(userSettingsRepository),
                 child: SettingScreen(),
               )
           ,

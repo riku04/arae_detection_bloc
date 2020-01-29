@@ -9,17 +9,17 @@ import 'package:path_provider/path_provider.dart';
 class Logger{
   String path;
   List<Polygon> polygons;
+  Map<String,dynamic> parameter;
 
-  Logger(List<Polygon> polygons){
-    initLogger(polygons);
-  }
-
-  Future<void> initLogger(List<Polygon> polygons) async{
+  Future<void> initLogger(List<Polygon> polygons,Map<String,dynamic> parameter) async{
     final directory = await getApplicationDocumentsDirectory();
     final DateTime now = DateTime.now();
     final filename = "${now.hour}:${now.minute}:${now.second}";
     this.path = directory.path+"/"+filename+".csv";
     this.polygons = polygons;
+    this.parameter = parameter;
+    print("logger status \npolygons:[${polygons.length}]\nUserSettings[${parameter.toString()}]");
+
     return;
   }
 
@@ -52,8 +52,9 @@ class Logger{
     Stopwatch sw = Stopwatch();
     sw.start();
     await file.writeAsString(line + "\n", mode: FileMode.append,flush: true);
+    print(line);
     sw.stop();
-    print("write line takes [${sw.elapsedMicroseconds}] us");
+    //print("write line takes [${sw.elapsedMicroseconds}] us");
     return;
   }
 
@@ -64,7 +65,7 @@ class Logger{
     sw.start();
     lines = await file.readAsLines();
     sw.stop();
-    print("read lines takes [${sw.elapsedMicroseconds}] us");
+    //print("read lines takes [${sw.elapsedMicroseconds}] us");
     return lines;
   }
 
