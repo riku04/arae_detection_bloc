@@ -22,6 +22,11 @@ class ReadLogBloc extends Bloc{
         print(file.path);
       }
     });
+    
+    fileList.sort((a,b){
+      return b.compareTo(a);
+    });
+
     logList.add(fileList);
   }
 

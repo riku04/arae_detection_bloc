@@ -35,7 +35,7 @@ class Logger{
       final DateTime now = DateTime.now();
       DateFormat formatter =  DateFormat("yyyyMMddHHmmss");
       String formatted = formatter.format(now);
-      var filename = formatted;
+      var filename = parameter[UserSettings.GROUP_ID]+"_"+parameter[UserSettings.USER_ID]+"_"+formatted;
       this.path = directory.path+"/"+filename+".csv";
     }
 
