@@ -63,14 +63,13 @@ class Logger{
 //          file.writeAsString(pointsString+"\n",mode: FileMode.append,flush: true);
 //        });
 //      }
-
+      String pointsString = "";
       if(polygons!=null&&polygons.isNotEmpty){
-        polygons.forEach((polygon) async {
-          String pointsString = Helper.pointsToString(polygon.points);
-          await file.writeAsString(pointsString+"\n",mode: FileMode.append,flush: true);
+        polygons.forEach((polygon){
+          pointsString += Helper.pointsToString(polygon.points)+"\n";
         });
       }
-
+      await file.writeAsString(pointsString,mode: FileMode.append,flush: true);
       await file.writeAsString("Data,Time,Latitude[deg.],Longitude[deg.],Status"+"\n",mode: FileMode.append,flush: true);
     }
 

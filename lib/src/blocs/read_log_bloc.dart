@@ -28,7 +28,7 @@ class ReadLogBloc extends Bloc{
   Future<void> openOnAnotherApp(String filename) async{
     Directory directory = await getApplicationDocumentsDirectory();
     String path = directory.path +"/"+ filename;
-    OpenFile.open(path,type: "text/plain",uti: "public.plauin-text");
+    OpenFile.open(path);
     return;
   }
 
