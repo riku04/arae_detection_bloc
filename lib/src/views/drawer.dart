@@ -132,6 +132,18 @@ class _MainDrawerState extends State<MainDrawer> {
           FlatButton(
             child: Row(children: [
               SpaceBox(width: 16),
+              Icon(Icons.history),
+              SpaceBox(width: 64),
+              Text("READ LOG DATA")
+            ]),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.pushNamed(context, '/read-log-screen');
+            },
+          ),
+          FlatButton(
+            child: Row(children: [
+              SpaceBox(width: 16),
               Icon(Icons.settings),
               SpaceBox(width: 64),
               Text("SETTING")

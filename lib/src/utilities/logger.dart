@@ -33,7 +33,7 @@ class Logger{
     if(path==""){
       final directory = await getApplicationDocumentsDirectory();
       final DateTime now = DateTime.now();
-      DateFormat formatter =  DateFormat("yyyyMMddhhmmss");
+      DateFormat formatter =  DateFormat("yyyyMMddHHmmss");
       String formatted = formatter.format(now);
       var filename = formatted;
       this.path = directory.path+"/"+filename+".csv";
@@ -56,11 +56,21 @@ class Logger{
       await file.writeAsString("Approach Distance[m]"+"\n",mode: FileMode.append,flush: true);
       await file.writeAsString("${us[UserSettings.CLOSE_DISTANCE_METER]}"+"\n",mode: FileMode.append,flush: true);
       await file.writeAsString("Area Coordinates[deg.]"+"\n",mode: FileMode.append,flush: true);
-      if(polygons!=null&&polygons.isNotEmpty) {
+
+//      if(polygons.isNotEmpty){
+//        Future.forEach(polygons, (polygon) async{
+//          String pointsString = Helper.pointsToString(polygon);
+//          file.writeAsString(pointsString+"\n",mode: FileMode.append,flush: true);
+//        });
+//      }
+
+      if(polygons!=null&&polygons.isNotEmpty){
         polygons.forEach((polygon) async {
-          await file.writeAsString(Helper.pointsToString(polygon.points)+"\n",mode: FileMode.append,flush: true);
+          String pointsString = Helper.pointsToString(polygon.points);
+          await file.writeAsString(pointsString+"\n",mode: FileMode.append,flush: true);
         });
       }
+
       await file.writeAsString("Data,Time,Latitude[deg.],Longitude[deg.],Status"+"\n",mode: FileMode.append,flush: true);
     }
 
