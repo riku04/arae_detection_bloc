@@ -28,7 +28,48 @@ class Logger{
     return;
   }
 
+  bool isLoggingAllowedTime(DateTime now){
+    bool result = false;
+
+    int startHour = parameter[UserSettings.START_HOUR];
+    int startMin = parameter[UserSettings.START_MINUTE];
+    int startLunchHour = parameter[UserSettings.START_LUNCH_HOUR];
+    int startLunchMin = parameter[UserSettings.START_LUNCH_MINUTE];
+    int endLunchHour = parameter[UserSettings.END_LUNCH_HOUR];
+    int endLunchMin = parameter[UserSettings.END_LUNCH_MINUTE];
+    int endHour = parameter[UserSettings.END_HOUR];
+    int endMin = parameter[UserSettings.END_MINUTE];
+
+    DateTime startTime = DateTime(now.year,now.month,now.day,startHour,startMin);
+    DateTime startLunchTime = DateTime(now.year,now.month,now.day,startLunchHour,startLunchMin);
+    DateTime endLunchTime = DateTime(now.year,now.month,now.day,endLunchHour,endLunchMin);
+    DateTime endTime = DateTime(now.year,now.month,now.day,endHour,endMin);
+
+    print("**********");
+    print("now:"+now.toString());
+    print("start:"+startTime.toString());
+    print("start lunch:"+startLunchTime.toString());
+    print("end lunch:"+endLunchTime.toString());
+    print("end:"+endTime.toString());
+    print("**********");
+
+    bool isMorning = (now.isAfter(startTime)&&now.isBefore(startLunchTime));
+    bool isAfternoon = (now.isAfter(endLunchTime)&&now.isBefore(endTime));
+
+    if((now.isAfter(startTime)&&now.isBefore(startLunchTime))||
+        (now.isAfter(endLunchTime)&&now.isBefore(endTime))){
+      result = true;
+    }
+
+    return result;
+  }
+
   Future<void> addLog(DateTime dateTime,LatLng point,int status) async{
+
+    if(!isLoggingAllowedTime(dateTime)){
+      print("it's not logging time now");
+      return;
+    }
 
     if(path==""){
       final directory = await getApplicationDocumentsDirectory();
@@ -57,12 +98,6 @@ class Logger{
       await file.writeAsString("${us[UserSettings.CLOSE_DISTANCE_METER]}"+"\n",mode: FileMode.append,flush: true);
       await file.writeAsString("Area Coordinates[deg.]"+"\n",mode: FileMode.append,flush: true);
 
-//      if(polygons.isNotEmpty){
-//        Future.forEach(polygons, (polygon) async{
-//          String pointsString = Helper.pointsToString(polygon);
-//          file.writeAsString(pointsString+"\n",mode: FileMode.append,flush: true);
-//        });
-//      }
       String pointsString = "";
       if(polygons!=null&&polygons.isNotEmpty){
         polygons.forEach((polygon){

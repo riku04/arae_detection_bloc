@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_location/flutter_background_location.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:flutter_map_app/src/utilities/logger.dart';
+import 'package:latlong/latlong.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -20,6 +22,9 @@ class _MapScreenState extends State<MapScreen> {
   void initState(){
     super.initState();
     _mapController = MapController();
+
+
+
   }
 
   @override

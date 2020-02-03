@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_background_location/flutter_background_location.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/models/area.dart';
 import 'package:flutter_map_app/src/models/user_settings.dart';
@@ -238,6 +239,12 @@ class MapBloc extends Bloc {
       setLogger();
     });
 
+    FlutterBackgroundLocation.startLocationService();
+    FlutterBackgroundLocation.getLocationUpdates((point){
+      print("point: ${point.latitude},${point.longitude}");
+      addCurrentLocation.add(LatLng(point.latitude,point.longitude));
+    });
+
     onAddPoint.listen((point) {
       double latitude = double.parse(point.latitude.toStringAsFixed(7));
       double longitude = double.parse(point.longitude.toStringAsFixed(7));
@@ -266,24 +273,16 @@ class MapBloc extends Bloc {
     });
 
     onCurrentLocationChanged.listen((point) async {
-      await _logger.addLog(DateTime.now(), point, 0);
-      List<String> lines = await _logger.readLines();
-      //print("************");
-//      lines.forEach((line) {
-//        print(line);
-//      });
-      //print("************");
-
-      bool result = false;
+      int result = 0;
       _polygons.forEach((polygon) {
         if (polygonContainsPoint(polygon, point)) {
           print("inside");
-          result = true;
+          result = 1;
         } else {
           print("outside");
         }
       });
-      if (result) {
+      if (result==1) {
         Vibration.hasVibrator().then((bool) {
           if (bool) {
             Vibration.vibrate();
@@ -294,7 +293,7 @@ class MapBloc extends Bloc {
           builder: (ctx) {
             return Icon(
               Icons.location_on,
-              color: Colors.black,
+              color: Colors.yellowAccent,
             );
           },
           anchorPos: AnchorPos.align(AnchorAlign.top),
@@ -305,12 +304,13 @@ class MapBloc extends Bloc {
             point: point,
             builder: (ctx) {
               return Icon(
-                Icons.location_off,
+                Icons.location_on,
                 color: Colors.green,
               );
             }));
         setLayers.add(layers);
       }
+      await _logger.addLog(DateTime.now(), point, result);
     });
   }
   @override
