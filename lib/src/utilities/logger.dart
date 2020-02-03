@@ -53,12 +53,12 @@ class Logger{
     print("end:"+endTime.toString());
     print("**********");
 
-    bool isMorning = (now.isAfter(startTime)&&now.isBefore(startLunchTime));
-    bool isAfternoon = (now.isAfter(endLunchTime)&&now.isBefore(endTime));
-
     if((now.isAfter(startTime)&&now.isBefore(startLunchTime))||
         (now.isAfter(endLunchTime)&&now.isBefore(endTime))){
+      print("logging : on");
       result = true;
+    }else{
+      print("logging : off");
     }
 
     return result;
@@ -67,7 +67,6 @@ class Logger{
   Future<void> addLog(DateTime dateTime,LatLng point,int status) async{
 
     if(!isLoggingAllowedTime(dateTime)){
-      print("it's not logging time now");
       return;
     }
 
