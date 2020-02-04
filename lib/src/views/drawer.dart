@@ -126,7 +126,7 @@ class _MainDrawerState extends State<MainDrawer> {
             ]),
             onPressed: () {
               Navigator.of(context).pop();
-              Navigator.pushNamed(context, '/ble-scan-screen');
+              Navigator.pushNamed(context, '/ble-central-screen');
             },
           ),
           FlatButton(

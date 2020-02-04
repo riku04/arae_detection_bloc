@@ -4,7 +4,7 @@ import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
 
-class BleScanBloc extends Bloc {
+class BleCentralBloc extends Bloc {
   FlutterBlue _flutterBlue;
   List<BluetoothDevice> devices;
   bool isScanning = false;
@@ -102,7 +102,7 @@ class BleScanBloc extends Bloc {
     });
   }
 
-  BleScanBloc() {
+  BleCentralBloc() {
     devices = new List();
     updateDeviceList();
 

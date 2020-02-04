@@ -2,17 +2,17 @@ import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
-import 'package:flutter_map_app/src/blocs/ble_scan_bloc.dart';
+import 'package:flutter_map_app/src/blocs/ble_central_bloc.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:flutter_map_app/src/widgets/space_box.dart';
 
-class BleScanScreen extends StatefulWidget {
+class BleCentralScreen extends StatefulWidget {
   @override
-  _BleScanScreenState createState() => _BleScanScreenState();
+  _BleCentralScreenState createState() => _BleCentralScreenState();
 }
 
-class _BleScanScreenState extends State<BleScanScreen> {
+class _BleCentralScreenState extends State<BleCentralScreen> {
   @override
   void initState() {
     // TODO: implement initState
@@ -22,7 +22,7 @@ class _BleScanScreenState extends State<BleScanScreen> {
   @override
   build(BuildContext context) {
     final mapBloc = BlocProvider.of<MapBloc>(context);
-    final bleScanBloc = BlocProvider.of<BleScanBloc>(context);
+    final bleScanBloc = BlocProvider.of<BleCentralBloc>(context);
 
     return SafeArea(
         child: WillPopScope(
