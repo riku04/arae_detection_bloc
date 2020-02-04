@@ -2,12 +2,13 @@
 import 'dart:async';
 
 import 'package:bloc_provider/bloc_provider.dart';
+import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:flutter_map_app/src/models/user_settings.dart';
 import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 
 class SettingBloc extends Bloc{
-  UserSettingsRepository _repository;
 
+  UserSettingsRepository _repository;
   Map<String,dynamic> _settings; //DBから読み出したパラメータ
   UserSettings _tempUserSettings; //変更後のパラメータ
 
@@ -234,7 +235,7 @@ class SettingBloc extends Bloc{
     beaconNameListString.add(_settings[UserSettings.BEACON_NAME_LIST_STRING]);
   }
   
-  Future<void> save() async{
+  Future<Map<String,dynamic>> save() async{
     Map<String,dynamic> userSettingsMap = _tempUserSettings.toJson();
     List<String> keys = userSettingsMap.keys.toList();
     for(int i=0; i<= userSettingsMap.length-1; i++){
@@ -242,10 +243,12 @@ class SettingBloc extends Bloc{
         print("key:${keys[i]}");
         print("new[${userSettingsMap[keys[i]].toString()}]!=[${_settings[keys[i]].toString()}]old");
         await _repository.setTableData(_tempUserSettings);
+
         _settings = _tempUserSettings.toJson();
-        return;
+        return _settings;
       }
     }
+    return Map();
   }
 
   SettingBloc(UserSettingsRepository repository){

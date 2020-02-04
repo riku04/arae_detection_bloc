@@ -10,6 +10,15 @@ class Helper {
     return string;
   }
 
+  static Future<String> asyncPointsToString(List<LatLng> points)async{
+    String polyStr = "";
+    points.forEach((point) {
+      polyStr += '${point.latitude.toString()},${point.longitude.toString()},';
+    });
+    polyStr = polyStr.substring(0, polyStr.length - 1);
+    return polyStr;
+  }
+
   static String pointsToString(List<LatLng> points) {
     String polyStr = "";
     points.forEach((point) {
