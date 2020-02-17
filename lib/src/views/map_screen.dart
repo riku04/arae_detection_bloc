@@ -9,6 +9,7 @@ import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:flutter_map_app/src/utilities/logger.dart';
 import 'package:latlong/latlong.dart';
 
+
 class MapScreen extends StatefulWidget {
   @override
   _MapScreenState createState() => _MapScreenState();
@@ -22,8 +23,6 @@ class _MapScreenState extends State<MapScreen> {
   void initState(){
     super.initState();
     _mapController = MapController();
-
-
 
   }
 

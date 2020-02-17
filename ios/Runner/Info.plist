@@ -23,7 +23,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Bluetooth通信を許可します</string>
+	<string>Bluetoothの使用を許可します</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Bluetoothの使用を許可します</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>現在地の取得を許可します</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

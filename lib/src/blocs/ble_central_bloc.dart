@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter_blue/flutter_blue.dart';
@@ -87,13 +88,28 @@ class BleCentralBloc extends Bloc {
       print("connect success");
       updateDeviceList();
       device.discoverServices().then((serviceList) {
-        print("service discover success");
-        serviceList[0].characteristics[0].write([5, 4, 3, 2, 1]).then((_) {
-          print("characteristic write success");
-          device.disconnect();
-        }, onError: (e) {
-          print("characteristic write error");
+
+        serviceList.forEach((service) {
+          service.characteristics.forEach((characteristic) {
+            if(characteristic.uuid.toMac()==Guid("f851d584-5a3c-4f6b-9547-eda40ecf0ed8").toMac()){
+              characteristic.read().then((value){
+                Uint8List bytes = value;
+                print("characteristic read: $bytes");
+                device.disconnect();
+
+              });
+            }
+          });
         });
+
+//        print("service discover success");
+//        serviceList[0].characteristics[0].write([5, 4, 3, 2, 1]).then((_) {
+//          print("characteristic write success");
+//          device.disconnect();
+//        }, onError: (e) {
+//          print("characteristic write error");
+//        });
+
       }, onError: (e) {
         print("service discover error");
       });

@@ -6,4 +6,6 @@ class Constants {
   static const int ALPHA_MASK = 0x20000000;
   static const int SCAN_TIMEOUT = 30;
   static const int CONNECTION_TIMEOUT = 10;
+  static const String defaultServiceUUID = "a851d584-5a3c-4f6b-9547-eda40ecf0ed8";
+  static const String defaultCharacteristicUUID = "b851d584-5a3c-4f6b-9547-eda40ecf0ed8";
 }

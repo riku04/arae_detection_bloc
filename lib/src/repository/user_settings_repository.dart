@@ -21,7 +21,6 @@ class UserSettingsRepository {
     String table = Constants.DEFAULT_USER_SETTING_TABLE;
     final UserSettingsDatabaseProvider provider = UserSettingsDatabaseProvider();
     final Database database = await provider.database;
-
     List list = await database.rawQuery("SELECT * FROM $table");
     if(list.isEmpty){
       await initData();

@@ -22,7 +22,7 @@ class _BleCentralScreenState extends State<BleCentralScreen> {
   @override
   build(BuildContext context) {
     final mapBloc = BlocProvider.of<MapBloc>(context);
-    final bleScanBloc = BlocProvider.of<BleCentralBloc>(context);
+    final bleCentralBloc = BlocProvider.of<BleCentralBloc>(context);
 
     return SafeArea(
         child: WillPopScope(
@@ -36,7 +36,7 @@ class _BleCentralScreenState extends State<BleCentralScreen> {
                 title: Text("SCAN DEVICES"),
                 bottom: PreferredSize(
                   child: StreamBuilder(
-                    stream: bleScanBloc.onStatus,
+                    stream: bleCentralBloc.onStatus,
                     builder: (context, statusSnapshot) {
                       if (statusSnapshot.hasData) {
                         return Text(
@@ -52,7 +52,7 @@ class _BleCentralScreenState extends State<BleCentralScreen> {
                 ),
               ),
               body: StreamBuilder<List<BluetoothDevice>>(
-                stream: bleScanBloc.onDeviceListChange,
+                stream: bleCentralBloc.onDeviceListChange,
                 builder: (context, deviceSnapshot) {
                   if (!deviceSnapshot.hasData) {
                     return Scaffold();
@@ -60,7 +60,7 @@ class _BleCentralScreenState extends State<BleCentralScreen> {
 
                   return RefreshIndicator(
                     onRefresh: () async {
-                      bleScanBloc.scan();
+                      bleCentralBloc.scan();
                       await Future.delayed(
                           new Duration(seconds: Constants.SCAN_TIMEOUT));
                     },
@@ -72,8 +72,8 @@ class _BleCentralScreenState extends State<BleCentralScreen> {
                             width: 1,
                             height: 1,
                           );
-                          if ((bleScanBloc.connectedDevice != null) &&
-                              (bleScanBloc.connectedDevice ==
+                          if ((bleCentralBloc.connectedDevice != null) &&
+                              (bleCentralBloc.connectedDevice ==
                                   deviceSnapshot.data[index])) {
                             color = Colors.greenAccent;
                             progress = CircularProgressIndicator();
@@ -105,7 +105,7 @@ class _BleCentralScreenState extends State<BleCentralScreen> {
                                             print("device name pressed:" +
                                                 deviceSnapshot
                                                     .data[index].name);
-                                            bleScanBloc.connect(
+                                            bleCentralBloc.connect(
                                                 deviceSnapshot.data[index]);
                                           },
                                         ),
