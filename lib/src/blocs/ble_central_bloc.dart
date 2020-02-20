@@ -1,9 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_map_app/src/models/area.dart';
+import 'package:flutter_map_app/src/models/user_settings.dart';
+import 'package:flutter_map_app/src/repository/area_repository.dart';
+import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
+import 'package:flutter_map_app/src/utilities/helper.dart';
 
 class BleCentralBloc extends Bloc {
   FlutterBlue _flutterBlue;
@@ -39,9 +46,10 @@ class BleCentralBloc extends Bloc {
             scanMode: ScanMode.lowLatency,
             timeout: Duration(seconds: Constants.SCAN_TIMEOUT))
         .listen((result) {
-      print(result.device.name);
+      //print(result.device.name);
       if ((result.device.name != "") && (!devices.contains(result.device))) {
         devices.add(result.device);
+        print(result.device.name);
         updateDeviceList();
       }
     }, onDone: () {
@@ -56,18 +64,22 @@ class BleCentralBloc extends Bloc {
   }
 
   void connect(BluetoothDevice device) {
+    if(isScanning){
+      _flutterBlue.stopScan();
+    }
     device.state.listen((state) {
       switch (state) {
-        case BluetoothDeviceState.connecting:
-          {}
+        case BluetoothDeviceState.connecting:{
+
+        }
           break;
-        case BluetoothDeviceState.connected:
-          {
-            connectedDevice = device;
-          }
+        case BluetoothDeviceState.connected:{
+           connectedDevice = device;
+        }
           break;
-        case BluetoothDeviceState.disconnecting:
-          {}
+        case BluetoothDeviceState.disconnecting:{
+
+        }
           break;
         case BluetoothDeviceState.disconnected:
           {
@@ -91,25 +103,28 @@ class BleCentralBloc extends Bloc {
 
         serviceList.forEach((service) {
           service.characteristics.forEach((characteristic) {
-            if(characteristic.uuid.toMac()==Guid("f851d584-5a3c-4f6b-9547-eda40ecf0ed8").toMac()){
-              characteristic.read().then((value){
-                Uint8List bytes = value;
-                print("characteristic read: $bytes");
-                device.disconnect();
+            if(characteristic.uuid.toMac()==Guid(Constants.defaultCharacteristicUUID).toMac()){
 
-              });
+              List<int> testBytes = List();
+              for(int i=0; i<=49; i++){
+                for(int j=0; j<=1023; j++){
+                 testBytes.add(j);
+                }
+              }
+              print("data to be send:$testBytes");
+
+
+              UserSettings settings = UserSettings();
+              settings.userId = "sendTest";
+              String serialized = jsonEncode(settings);
+              print(serialized);
+              List<int> encodedByte = utf8.encode(serialized);
+
+              sendBytesAsync(characteristic, encodedByte);
+
             }
           });
         });
-
-//        print("service discover success");
-//        serviceList[0].characteristics[0].write([5, 4, 3, 2, 1]).then((_) {
-//          print("characteristic write success");
-//          device.disconnect();
-//        }, onError: (e) {
-//          print("characteristic write error");
-//        });
-
       }, onError: (e) {
         print("service discover error");
       });
@@ -117,6 +132,53 @@ class BleCentralBloc extends Bloc {
       print("connect error");
     });
   }
+
+  Future<void> sendBytesAsync(BluetoothCharacteristic characteristic, List<int> bytes)async{
+
+    int length = bytes.length;
+    int mtu = 20;
+
+    int size = length ~/ mtu;
+
+    List<List<int>> sendList = List();
+
+    List<int> temp = List();
+    for(int cnt=0; cnt <= size-1; cnt++){
+      for(int num=0; num<=mtu-1; num++){
+        temp.add(bytes[cnt*mtu+num]);
+      }
+      sendList.add(temp.toList());
+      temp.clear();
+    }
+
+    for(int num = size*mtu; num <= length-1; num++){
+      temp.add(bytes[num]);
+    }
+    if(temp.isNotEmpty) {
+      sendList.add(temp.toList());
+    }
+
+    final header = Helper.intTo8BytesArray(sendList.length);
+    await characteristic.write(header);
+
+    Stopwatch stopwatch = Stopwatch();
+    stopwatch.start();
+    int cnt = 0;
+    Future.forEach(sendList, (bytes)async{
+      await Future.delayed(Duration(milliseconds: 20));
+      await characteristic.write(bytes,withoutResponse: true).then((value){
+        print("wrote");
+        print(sendList[cnt]);
+        print("$cnt:${stopwatch.elapsedMilliseconds}[ms]");
+        cnt++;
+      }).catchError((err){
+        print("err:${err.toString()}");
+      });
+    });
+
+  }
+
+
 
   BleCentralBloc() {
     devices = new List();
@@ -127,6 +189,7 @@ class BleCentralBloc extends Bloc {
 
     _flutterBlue.isScanning.listen((bool) {
       print("isScanning..." + bool.toString());
+      isScanning = bool;
       if (bool) {
         status.add("スキャン中…");
       } else {
@@ -137,6 +200,31 @@ class BleCentralBloc extends Bloc {
     _flutterBlue.state.listen((state) {
       print("state:" + state.toString());
     });
+
+    UserSettings settings = UserSettings();
+    UserSettingsRepository().getTableData().then((value){
+
+    });
+
+//    Area area = Area();
+//    var asea = AreaRepository().getTableList();
+//
+//    String serialized = jsonEncode(settings);
+//
+//    print(serialized);
+//
+//    List<int> encodedByte = utf8.encode(serialized);
+//
+//    print(encodedByte);
+//
+//    //*********************************************//
+//
+//    String decodedString = utf8.decode(encodedByte);
+//
+//    var deserialized = jsonDecode(decodedString);
+//
+//    print(deserialized);
+
   }
 
   @override
@@ -146,5 +234,6 @@ class BleCentralBloc extends Bloc {
     _scanningStateController.close();
     _statusController.close();
     _flutterBlue.stopScan();
+    devices.clear();
   }
 }

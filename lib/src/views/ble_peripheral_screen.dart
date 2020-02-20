@@ -8,10 +8,13 @@ class BlePeripheralScreen{
 
   BlePeripheralScreen(BuildContext context){
     this.context = context;
-    blePeripheralBloc = BlePeripheralBloc();
   }
 
   void startAdvertiseDialog(){
+
+    blePeripheralBloc = BlePeripheralBloc();
+    blePeripheralBloc.startAdvertise("fltr");
+
     Widget progress = Container(width: 1,height: 1,);
     progress = LinearProgressIndicator();
     showDialog(
@@ -28,7 +31,7 @@ class BlePeripheralScreen{
                   stream: blePeripheralBloc.onStatus,
                   builder: (context, statusSnapshot){
                     if(statusSnapshot.hasData){
-                      return Center(child: Text(statusSnapshot.data,style: TextStyle(fontSize: 30.0,color: Colors.lightBlue),),);
+                      return Center(child: Text(statusSnapshot.data,style: TextStyle(fontSize: 20.0,color: Colors.lightBlue),),);
                     }else{
                       return SpaceBox(width:1,height:1);
                     }
@@ -42,7 +45,10 @@ class BlePeripheralScreen{
           actions: <Widget>[
             FlatButton(
               child: Text("Cancel"),
-              onPressed: () => Navigator.pop(context),
+              onPressed: (){
+                blePeripheralBloc.stopAdvertise();
+                Navigator.pop(context);
+                },
             ),
             SpaceBox(width: 5,)
           ],
