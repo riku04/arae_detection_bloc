@@ -37,6 +37,9 @@ dependencies:
   open_file: ^3.0.1
   flutter_background_location: ^0.0.4
 
+  flutter_ble_peripheral:
+    path: ../flutter_ble_peripheral/
+
   flutter_localizations:
     sdk: flutter
 

@@ -2,6 +2,7 @@ import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
+import 'package:flutter_map_app/src/views/ble_peripheral_screen.dart';
 import 'package:flutter_map_app/src/widgets/space_box.dart';
 
 class MainDrawer extends StatefulWidget {
@@ -126,7 +127,20 @@ class _MainDrawerState extends State<MainDrawer> {
             ]),
             onPressed: () {
               Navigator.of(context).pop();
-              Navigator.pushNamed(context, '/ble-scan-screen');
+              Navigator.pushNamed(context, '/ble-central-screen');
+            },
+          ),
+          FlatButton(
+            child: Row(children: [
+              SpaceBox(width: 16),
+              Icon(Icons.bluetooth_searching),
+              SpaceBox(width: 64),
+              Text("RECEIVE SETTINGS")
+            ]),
+            onPressed: () {
+              Navigator.of(context).pop();
+              BlePeripheralScreen(context).startAdvertiseDialog();
+//              Navigator.pushNamed(context, '/ble-peripheral-screen');
             },
           ),
           FlatButton(

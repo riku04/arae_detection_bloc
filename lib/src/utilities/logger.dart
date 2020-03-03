@@ -45,20 +45,20 @@ class Logger{
     DateTime endLunchTime = DateTime(now.year,now.month,now.day,endLunchHour,endLunchMin);
     DateTime endTime = DateTime(now.year,now.month,now.day,endHour,endMin);
 
-    print("**********");
-    print("now:"+now.toString());
-    print("start:"+startTime.toString());
-    print("start lunch:"+startLunchTime.toString());
-    print("end lunch:"+endLunchTime.toString());
-    print("end:"+endTime.toString());
-    print("**********");
+//    print("**********");
+//    print("now:"+now.toString());
+//    print("start:"+startTime.toString());
+//    print("start lunch:"+startLunchTime.toString());
+//    print("end lunch:"+endLunchTime.toString());
+//    print("end:"+endTime.toString());
+//    print("**********");
 
     if((now.isAfter(startTime)&&now.isBefore(startLunchTime))||
         (now.isAfter(endLunchTime)&&now.isBefore(endTime))){
-      print("logging : on");
+      //print("logging : on");
       result = true;
     }else{
-      print("logging : off");
+      //print("logging : off");
     }
 
     return result;
@@ -110,7 +110,7 @@ class Logger{
     Stopwatch sw = Stopwatch();
     sw.start();
     await file.writeAsString(line + "\n", mode: FileMode.append,flush: true);
-    print(line);
+    //print(line);
     sw.stop();
     //print("write line takes [${sw.elapsedMicroseconds}] us");
     return;
