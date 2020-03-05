@@ -8,6 +8,11 @@ class Area {
 
   Area.toJson(Map<String, dynamic> json) : areaPointsStr = json['points'];
 
+  Area fromJson(Map<String,dynamic> json){
+    this.areaPointsStr = json['points'];
+    return this;
+  }
+
   Map<String, dynamic> toJson() => {
         'points': areaPointsStr,
       };

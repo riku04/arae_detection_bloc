@@ -107,7 +107,7 @@ class MapBloc extends Bloc {
     setLayers.add(layers);
   }
 
-  void createPolygon() {
+  Future<void> createPolygon() async {
     if (_draftPolygons.isEmpty) {
       return;
     }
@@ -123,6 +123,7 @@ class MapBloc extends Bloc {
 
     _draftMarkers.clear();
     _draftPolygons.clear();
+    return;
   }
 
   void removeAllPolygons() {

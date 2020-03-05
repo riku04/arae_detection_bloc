@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:bloc_provider/bloc_provider.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_map_app/src/models/area.dart';
 import 'package:flutter_map_app/src/models/user_settings.dart';
@@ -47,7 +48,10 @@ class BleCentralBloc extends Bloc {
             timeout: Duration(seconds: Constants.SCAN_TIMEOUT))
         .listen((result) {
       //print(result.device.name);
-      if ((result.device.name != "") && (!devices.contains(result.device))) {
+      //if ((result.device.name != "") && (!devices.contains(result.device))) {
+
+      if ((!devices.contains(result.device))) {
+
         devices.add(result.device);
         print(result.device.name);
         updateDeviceList();
@@ -63,7 +67,8 @@ class BleCentralBloc extends Bloc {
     }, cancelOnError: true);
   }
 
-  void connect(BluetoothDevice device) {
+  void connect(BluetoothDevice device,String userId, String groupId) {
+
     if(isScanning){
       _flutterBlue.stopScan();
     }
@@ -105,22 +110,35 @@ class BleCentralBloc extends Bloc {
           service.characteristics.forEach((characteristic) {
             if(characteristic.uuid.toMac()==Guid(Constants.defaultCharacteristicUUID).toMac()){
 
-              List<int> testBytes = List();
-              for(int i=0; i<=49; i++){
-                for(int j=0; j<=1023; j++){
-                 testBytes.add(j);
-                }
-              }
-              print("data to be send:$testBytes");
-
-
               UserSettings settings = UserSettings();
-              settings.userId = "sendTest";
-              String serialized = jsonEncode(settings);
-              print(serialized);
-              List<int> encodedByte = utf8.encode(serialized);
+              UserSettingsRepository().getTableData().then((json) async {
+                settings.fromJson(json);
+                settings.admin = 0;
+                settings.userId = userId;
+                settings.groupId = groupId;
+                String serialized = jsonEncode(settings);
+                print(serialized);
+                List<int> encodedBytes = utf8.encode(serialized);
+                await sendBytesAsync(Constants.SEND_TYPE_SETTINGS,characteristic, encodedBytes).then((_){
+                  AreaRepository().getPointsListByTableName(Constants.DEFAULT_AREA_TABLE).then((list){
+                    Future.forEach(list, (points) async {
+                      Area area = Area();
+                      area.areaPointsStr = Helper.pointsToString(points);
+                      String serializedArea = jsonEncode(area);
+                      print(serializedArea);
+                      List<int> encodedBytesArea = utf8.encode(serializedArea);
+                      await sendBytesAsync(Constants.SEND_TYPE_AREA, characteristic, encodedBytesArea);
+                    }).then((_){
+                      sendBytesAsync(Constants.SEND_END, characteristic, []).then((_){
+                        connectedDevice.disconnect();
+                      });
+                    });
+                  });
+                });
+            });
 
-              sendBytesAsync(characteristic, encodedByte);
+
+
 
             }
           });
@@ -133,7 +151,7 @@ class BleCentralBloc extends Bloc {
     });
   }
 
-  Future<void> sendBytesAsync(BluetoothCharacteristic characteristic, List<int> bytes)async{
+  Future<void> sendBytesAsync(int type,BluetoothCharacteristic characteristic, List<int> bytes)async{
 
     int length = bytes.length;
     int mtu = 20;
@@ -158,13 +176,21 @@ class BleCentralBloc extends Bloc {
       sendList.add(temp.toList());
     }
 
+    print("type:${type}");
+    await Future.delayed(Duration(milliseconds: 50));
+    await characteristic.write([type],withoutResponse: true);
+
+    await Future.delayed(Duration(milliseconds: 50));
     final header = Helper.intTo8BytesArray(sendList.length);
-    await characteristic.write(header);
+    print("header${header}");
+    await characteristic.write(header,withoutResponse: true).then((_){
+      print("write header");
+    });
 
     Stopwatch stopwatch = Stopwatch();
     stopwatch.start();
     int cnt = 0;
-    Future.forEach(sendList, (bytes)async{
+    await Future.forEach(sendList, (bytes)async{
       await Future.delayed(Duration(milliseconds: 20));
       await characteristic.write(bytes,withoutResponse: true).then((value){
         print("wrote");
@@ -175,10 +201,8 @@ class BleCentralBloc extends Bloc {
         print("err:${err.toString()}");
       });
     });
-
+    return;
   }
-
-
 
   BleCentralBloc() {
     devices = new List();
@@ -206,24 +230,31 @@ class BleCentralBloc extends Bloc {
 
     });
 
-//    Area area = Area();
-//    var asea = AreaRepository().getTableList();
-//
-//    String serialized = jsonEncode(settings);
-//
-//    print(serialized);
-//
-//    List<int> encodedByte = utf8.encode(serialized);
-//
-//    print(encodedByte);
-//
-//    //*********************************************//
-//
-//    String decodedString = utf8.decode(encodedByte);
-//
-//    var deserialized = jsonDecode(decodedString);
-//
-//    print(deserialized);
+
+    List<Area> areas = List();
+    AreaRepository().getPointsListByTableName(Constants.DEFAULT_AREA_TABLE).then((value){
+      value.forEach((points) {
+        Area area = Area();
+        area.areaPointsStr = Helper.pointsToString(points);
+        areas.add(area);
+      });
+    });
+    
+    String serialized = jsonEncode(settings);
+
+    print(serialized);
+
+    List<int> encodedByte = utf8.encode(serialized);
+
+    print(encodedByte);
+
+    //*********************************************//
+
+    String decodedString = utf8.decode(encodedByte);
+
+    var deserialized = jsonDecode(decodedString);
+
+    print(deserialized);
 
   }
 

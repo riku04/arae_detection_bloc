@@ -12,7 +12,7 @@ class BlePeripheralScreen{
 
   void startAdvertiseDialog(){
 
-    blePeripheralBloc = BlePeripheralBloc();
+    blePeripheralBloc = BlePeripheralBloc(context);
     blePeripheralBloc.startAdvertise("fltr");
 
     Widget progress = Container(width: 1,height: 1,);
@@ -31,10 +31,16 @@ class BlePeripheralScreen{
                   stream: blePeripheralBloc.onStatus,
                   builder: (context, statusSnapshot){
                     if(statusSnapshot.hasData){
-                      return Center(child: Text(statusSnapshot.data,style: TextStyle(fontSize: 20.0,color: Colors.lightBlue),),);
+
+                      if(statusSnapshot.data=="complete"){
+                        Navigator.of(context).pop();
+                      }
+
+                      return Center(child: Text(statusSnapshot.data.toString(),style: TextStyle(fontSize: 20.0,color: Colors.lightBlue),),);
                     }else{
                       return SpaceBox(width:1,height:1);
                     }
+
                   },
                 ),
                 SpaceBox(height: 10,),

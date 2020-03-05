@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_map_app/src/blocs/ble_central_bloc.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
+import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:flutter_map_app/src/widgets/space_box.dart';
 
@@ -105,8 +106,55 @@ class _BleCentralScreenState extends State<BleCentralScreen> {
                                             print("device name pressed:" +
                                                 deviceSnapshot
                                                     .data[index].name);
-                                            bleCentralBloc.connect(
-                                                deviceSnapshot.data[index]);
+
+                                            TextEditingController _userIdController = TextEditingController();
+                                            TextEditingController _groupIdController = TextEditingController();
+                                            UserSettingsRepository().getTableData().then((value){
+                                              _userIdController.text = value["USER_ID"];
+                                              _groupIdController.text = value["GROUP_ID"];
+                                            });
+
+                                            showDialog(
+                                                context: context,
+                                                builder: (context) {
+                                                  return AlertDialog(
+                                                    title: Text("input user name"),
+                                                    content: Column(
+                                                      children: <Widget>[
+                                                        Text("user id:"),
+                                                        TextField(controller: _userIdController,),
+                                                        Text("group id"),
+                                                        TextField(controller: _groupIdController,),
+                                                      ],
+                                                    ),
+                                                    actions: <Widget>[
+                                                      FlatButton(
+                                                        child: Text("OK"),
+                                                        onPressed: () {
+                                                          if (_userIdController.text.isEmpty || _groupIdController.text.isEmpty) {
+                                                            return;
+                                                          }
+                                                          print("user id:" + _userIdController.text);
+                                                          print("group id:"+ _groupIdController.text);
+
+                                                          bleCentralBloc.connect(deviceSnapshot.data[index],_userIdController.text,_groupIdController.text);
+
+                                                          Navigator.of(context).pop();
+                                                        },
+                                                      ),
+                                                      FlatButton(
+                                                        child: Text("CANCEL"),
+                                                        onPressed: () {
+                                                          _userIdController.clear();
+                                                          _groupIdController.clear();
+                                                          Navigator.of(context).pop();
+                                                        },
+                                                      )
+                                                    ],
+                                                  );
+                                                });
+
+
                                           },
                                         ),
                                         SpaceBox(

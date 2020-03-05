@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 class Constants {
   static const String AREA_DATABASE_NAME = "area.db";
   static const String DEFAULT_AREA_TABLE = "area0";
@@ -8,4 +10,7 @@ class Constants {
   static const int CONNECTION_TIMEOUT = 10;
   static const String defaultServiceUUID = "a851d584-5a3c-4f6b-9547-eda40ecf0ed8";
   static const String defaultCharacteristicUUID = "b851d584-5a3c-4f6b-9547-eda40ecf0ed8";
+  static const num SEND_TYPE_AREA = 0x01;
+  static const num SEND_TYPE_SETTINGS = 0x02;
+  static const num SEND_END = 0x99;
 }

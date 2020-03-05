@@ -31,6 +31,8 @@ class UserSettingsRepository {
     }
   }
 
+
+
   Future<void> setTableData(UserSettings settings) async{
     final UserSettingsDatabaseProvider provider =
     UserSettingsDatabaseProvider();

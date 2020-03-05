@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background_location/flutter_background_location.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
+import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:flutter_map_app/src/utilities/logger.dart';
 import 'package:latlong/latlong.dart';
 
@@ -23,7 +24,6 @@ class _MapScreenState extends State<MapScreen> {
   void initState(){
     super.initState();
     _mapController = MapController();
-
   }
 
   @override
@@ -32,6 +32,8 @@ class _MapScreenState extends State<MapScreen> {
 
     blocMap.initLayers();
     blocMap.initMapOptions();
+
+    blocMap.readSavedArea(Constants.DEFAULT_AREA_TABLE);
 
     return Scaffold(
         body: Container(
@@ -69,7 +71,13 @@ class _MapScreenState extends State<MapScreen> {
                 backgroundColor: Colors.yellow,
                 label: Text("ok"),
                 onPressed: () {
-                  blocMap.createPolygon();
+
+                  blocMap.createPolygon().then((_){
+                    blocMap.removeAreaByAreaName(Constants.DEFAULT_AREA_TABLE).then((_){
+                      blocMap.saveCurrentArea(Constants.DEFAULT_AREA_TABLE);
+                    });
+                  });
+
                 },
               ),
             ),
