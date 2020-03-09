@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html';
 import 'dart:typed_data';
 
 import 'package:bloc_provider/bloc_provider.dart';
@@ -149,7 +148,6 @@ class BlePeripheralBloc extends Bloc {
           }
 
           blocMap.readSavedArea(Constants.DEFAULT_AREA_TABLE);
-
 
         }
       }

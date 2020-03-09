@@ -6,36 +6,54 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background_location/flutter_background_location.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/models/area.dart';
+import 'package:flutter_map_app/src/models/log_data.dart';
 import 'package:flutter_map_app/src/models/user_settings.dart';
 import 'package:flutter_map_app/src/repository/area_repository.dart';
 import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:flutter_map_app/src/utilities/helper.dart';
 import 'package:flutter_map_app/src/utilities/logger.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:latlong/latlong.dart';
 import 'package:vibration/vibration.dart';
 
 class MapBloc extends Bloc {
+  BuildContext context;
   AreaRepository _areaRepository;
   UserSettingsRepository _userSettingsRepository;
   
   Logger _logger;
 
   List<Marker> _draftMarkers; //下書きポリゴンのマーカー
-  List<Marker> _logMarkers;
   List<Polygon>_draftPolygons; //PolygonLayerOptionsに下書きポリゴンを渡すためのリスト、要素数が1以上になることはない
+
+  List<Marker> _markers;  //移動履歴をリアルタイムで表示するマーカー
+  List<Polyline> _lines;  //ポリライン
   List<Polygon> _polygons; //こちらは禁止領域のポリゴン、複数になる
   List<Polygon> _expandedPolygons; //接近領域
   List<Polygon> _moreExpandedPolygons; //準接近領域
 
-  List<LayerOptions> layers; //画面更新はこの変数をStreamに流すことで行う
+  List<Marker> _logMarkers; //履歴ファイルを読み出して再生するときに使うマーカー
+  List<Polyline> _logLines; //ポリライン
+  List<Polygon> _logPolygons; //履歴ファイルから読み出した領域データ
+  List<Polygon> _logExpandedPolygons; //接近
+
+  List<LayerOptions> layers; //画面更新はこいつをStreamに流すことで行う
+
   TileLayerOptions _tileLayer; //地図タイルのレイヤ
   MarkerLayerOptions _draftMarkerLayer; //下書きマーカーのレイヤ
+  MarkerLayerOptions _markerLayer;
+  PolylineLayerOptions _lineLayer;
   MarkerLayerOptions _logMarkerLayer;
+  PolylineLayerOptions _logLineLayer;
   PolygonLayerOptions _draftPolygonLayer; //下書きポリゴンのレイヤ
   PolygonLayerOptions _polygonLayer; //禁止領域ポリゴンのレイヤ
   PolygonLayerOptions _expandedPolygonLayer; //接近領域ポリゴンのレイヤ
   PolygonLayerOptions _moreExpandedPolygonLayer; //準接近領域ポリゴンのレイヤ
+  PolygonLayerOptions _logPolygonLayer;
+  PolygonLayerOptions _logExpandedPolygonLayer;
+
+  bool isPolygonReady = false;
 
   final StreamController<MapOptions> _optionsController =
       StreamController<MapOptions>();
@@ -58,6 +76,23 @@ class MapBloc extends Bloc {
   Sink<Map<String,dynamic>> get settings => _userSettingsController.sink;
   Stream<Map<String,dynamic>> get onSettingsChanged => _userSettingsController.stream;
 
+  final _logPlayerVisibleController = StreamController<bool>.broadcast();
+  Sink<bool> get logPlayerVisible => _logPlayerVisibleController.sink;
+  Stream<bool> get onLogPlayerVisibleChanged => _logPlayerVisibleController.stream;
+
+  final _logPLayerStateController = StreamController<int>.broadcast();
+  Sink<int> get logPlayerState => _logPLayerStateController.sink;
+  Stream<int> get onLogPlayerStateChanged => _logPLayerStateController.stream;
+
+  final _logPlayerProgressController = StreamController<double>.broadcast();
+  Sink<double> get logPlayerProgress => _logPlayerProgressController.sink;
+  Stream<double> get onLogPlayerProgressUpdated => _logPlayerProgressController.stream;
+
+  final _logCurrentTimeController = StreamController<DateTime>();
+  Sink<DateTime> get logCurrentTime => _logCurrentTimeController.sink;
+  Stream<DateTime> get onLogCurrentTime => _logCurrentTimeController.stream;
+
+
   void initMapOptions() {
     MapOptions _mapOptions = new MapOptions(
         center: new LatLng(35.691075, 139.767828),
@@ -74,19 +109,28 @@ class MapBloc extends Bloc {
         urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         subdomains: ['a', 'b', 'c']);
     _draftMarkerLayer = MarkerLayerOptions(markers: _draftMarkers);
+    _markerLayer = MarkerLayerOptions(markers: _markers);
+    _lineLayer = PolylineLayerOptions(polylines: _lines);
     _logMarkerLayer = MarkerLayerOptions(markers: _logMarkers);
+    _logLineLayer = PolylineLayerOptions(polylines: _logLines);
     _draftPolygonLayer = PolygonLayerOptions(polygons: _draftPolygons);
     _polygonLayer = PolygonLayerOptions(polygons: _polygons);
     _expandedPolygonLayer = PolygonLayerOptions(polygons: _expandedPolygons);
-    _moreExpandedPolygonLayer =
-        PolygonLayerOptions(polygons: _moreExpandedPolygons);
+    _moreExpandedPolygonLayer = PolygonLayerOptions(polygons: _moreExpandedPolygons);
+    _logPolygonLayer = PolygonLayerOptions(polygons: _logPolygons);
+    _logExpandedPolygonLayer = PolygonLayerOptions(polygons: _logExpandedPolygons);
     layers.add(_tileLayer);
-    layers.add(_draftMarkerLayer);
     layers.add(_draftPolygonLayer);
     layers.add(_polygonLayer);
     layers.add(_expandedPolygonLayer);
     layers.add(_moreExpandedPolygonLayer);
+    layers.add(_logPolygonLayer);
+    layers.add(_logExpandedPolygonLayer);
+    layers.add(_logLineLayer);
     layers.add(_logMarkerLayer);
+    layers.add(_markerLayer);
+    layers.add(_draftMarkerLayer);
+    layers.add(_lineLayer);
     _layersController.add(layers);
   }
 
@@ -128,10 +172,17 @@ class MapBloc extends Bloc {
 
   void removeAllPolygons() {
     _polygons.clear();
+    _expandedPolygons.clear();
+    _moreExpandedPolygons.clear();
     setLogger();
+    _markers.clear();
+    _lines.clear();
     _draftPolygons.clear();
     _draftMarkers.clear();
     _logMarkers.clear();
+    _logLines.clear();
+    _logPolygons.clear();
+    _logExpandedPolygons.clear();
     setLayers.add(layers);
   }
 
@@ -217,27 +268,107 @@ class MapBloc extends Bloc {
   }
 
   //when userSettings or polygons changed call this to refresh the logger
-  void setLogger()async{
+  void setLogger() async{
     await _logger.initLogger(_polygons,await _userSettingsRepository.getTableData());
     print("logger refreshed");
   }
 
-  MapBloc(AreaRepository areaRepository,UserSettingsRepository userSettingsRepository)  {
+  List<DateTime> _tempDateTime = List();
+  List<Marker> _tempLogMarkers = List();
+  List<Polyline> _tempLogLines = List();
+  double progressPeriod = 0.0;
+
+  Future<void>setLogData(LogData logData) async{
+
+    showLogPlayer();
+
+    Stopwatch sw = Stopwatch();
+    sw.start();
+
+    _logMarkers.clear();
+    _logLines.clear();
+    _logPolygons.clear();
+    _logExpandedPolygons.clear();
+
+    await Future.forEach(logData.areas, (points){
+      _logPolygons.add(Polygon(
+          points: points,
+          color: Color(Colors.yellow.value - Constants.ALPHA_MASK),
+          borderColor: Color(Colors.yellow.value),
+          borderStrokeWidth: 1.0)
+      );
+    });
+
+    List<LatLng> tempLinePoints = List();
+
+    int cnt = 0;
+    Future.doWhile((){
+      Marker marker = Marker(
+          point: logData.datePoints[cnt].getPoint(),
+          anchorPos: AnchorPos.align(AnchorAlign.center),
+          builder: (ctx) {
+            return Icon(
+              Icons.fiber_manual_record,
+              color: Colors.orange,
+              size: 10,
+            );
+          });
+      _tempLogMarkers.add(marker);
+      _tempDateTime.add(logData.datePoints[cnt].getDateTime());
+
+      if(cnt<=logData.datePoints.length-2){
+        tempLinePoints.add(logData.datePoints[cnt].getPoint());
+        tempLinePoints.add(logData.datePoints[cnt + 1].getPoint());
+        _tempLogLines.add(Polyline(
+            points: tempLinePoints.toList(),
+            color: Colors.green,
+            borderColor: Colors.green,
+            borderStrokeWidth: 1.0
+        ));
+        tempLinePoints.clear();
+      }
+      if(cnt >= logData.datePoints.length-1){
+        return false;
+      }else{
+        cnt++;
+        return true;
+      }
+    });
+    setLayers.add(layers);
+    sw.stop();
+    print("log read:${sw.elapsedMilliseconds}[ms]");
+    print("log points:${_tempLogMarkers.length}");
+    progressPeriod = 1.0 / _tempLogMarkers.length;
+
+  return;
+  }
+
+  void showLogPlayer(){
+    logPlayerVisible.add(true);
+  }
+
+  MapBloc(BuildContext context,AreaRepository areaRepository,UserSettingsRepository userSettingsRepository)  {
     this._areaRepository = areaRepository;
     this._userSettingsRepository = userSettingsRepository;
     
-    _draftMarkers = new List();
-    _logMarkers = new List();
-    _draftPolygons = new List();
-    _polygons = new List();
-    _expandedPolygons = new List();
-    _moreExpandedPolygons = new List();
+    _draftMarkers = List();
+    _markers = List();
+    _lines = List();
+    _logMarkers = List();
+    _logLines = List();
+    _draftPolygons = List();
+    _polygons = List();
+    _expandedPolygons = List();
+    _moreExpandedPolygons = List();
+    _logPolygons = List();
+    _logExpandedPolygons = List();
 
     _logger = Logger();
     setLogger();
     onSettingsChanged.listen((settings) {
       print("settings changed");
       setLogger();
+      Fluttertoast.showToast(msg: "保存しました");
     });
 
     FlutterBackgroundLocation.startLocationService();
@@ -251,11 +382,10 @@ class MapBloc extends Bloc {
       double longitude = double.parse(point.longitude.toStringAsFixed(7));
 
       Marker _marker = new Marker(
-        width: 40.0,
-        height: 80.0,
         point: LatLng(latitude, longitude),
+        anchorPos: AnchorPos.align(AnchorAlign.top),
         builder: (ctx) => new Container(
-          child: new FlutterLogo(),
+          child: Icon(Icons.location_on,color: Colors.pinkAccent,),
         ),
       );
 
@@ -270,6 +400,11 @@ class MapBloc extends Bloc {
       print(point);
       if (_draftMarkers.length > 2) {
         createDraftPolygon(_draftMarkers);
+        isPolygonReady = true;
+        print(isPolygonReady);
+      }else{
+        isPolygonReady = false;
+        print(isPolygonReady);
       }
     });
 
@@ -289,7 +424,7 @@ class MapBloc extends Bloc {
             Vibration.vibrate();
           }
         });
-        _logMarkers.add(Marker(
+        _markers.add(Marker(
           point: point,
           builder: (ctx) {
             return Icon(
@@ -301,7 +436,7 @@ class MapBloc extends Bloc {
         ));
         setLayers.add(layers);
       } else {
-        _logMarkers.add(Marker(
+        _markers.add(Marker(
             point: point,
             builder: (ctx) {
               return Icon(
@@ -313,6 +448,47 @@ class MapBloc extends Bloc {
       }
       await _logger.addLog(DateTime.now(), point, result);
     });
+
+    logPlayerProgress.add(0.0);
+    logPlayerState.add(Constants.LOG_PLAY_STOP);
+    logPlayerVisible.add(false);
+    onLogPlayerProgressUpdated.listen((progress){
+      print(progress);
+    });
+
+
+
+    bool isPlayingLog = false;
+    Future future;
+
+
+
+    onLogPlayerStateChanged.listen((state)async{
+
+      if(state == Constants.LOG_PLAY_STOP){
+        return false;
+      } else {
+        int cnt = 0;
+        if(future==null) {
+          future = Future.doWhile(() async {
+            if (cnt++ >= 100) {
+              return false;
+            } else {
+              await Future.delayed(
+                  Duration(milliseconds: 1000));
+              logPlayerProgress.add(cnt / 100);
+
+              return true;
+            }
+          });
+        }else{
+
+        }
+
+      }
+    });
+
+
   }
   @override
   void dispose() {
@@ -320,5 +496,9 @@ class MapBloc extends Bloc {
     _addPointController.close();
     _currentLocationController.close();
     _userSettingsController.close();
+    _logPlayerVisibleController.close();
+    _logPLayerStateController.close();
+    _logPlayerProgressController.close();
+    _logCurrentTimeController.close();
   }
 }

@@ -36,6 +36,7 @@ class _SettingScreenState extends State<SettingScreen> {
               print("setting save pressed");
               blocSetting.save().then((settings){
                 mapBloc.settings.add(settings);
+
               });
             },
           )
