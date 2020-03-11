@@ -24,7 +24,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
   Logger logger;
 
   AnimationController _controller;
-  static const List<IconData> icons = const [Icons.check];
+  static const List<IconData> icons = const [Icons.clear,Icons.check];
 
   @override
   void initState(){
@@ -64,7 +64,6 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                           Icons.play_arrow,
                           color: Colors.grey
                       );
-                      String status = "";
                       switch(stateSnapshot.data){
                         case Constants.LOG_PLAY_STOP:
                           icon = Icon(
@@ -72,47 +71,11 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                             color: Colors.grey
                           );
                           break;
-                        case Constants.LOG_PLAY_1x:
+                        case Constants.LOG_PLAY_START:
                           icon = Icon(
                               Icons.stop,
                               color: Colors.grey
                           );
-                          status = "x1";
-                          break;
-                        case Constants.LOG_PLAY_2x:
-                          icon = Icon(
-                              Icons.stop,
-                              color: Colors.grey
-                          );
-                          status = "x2";
-                          break;
-                        case Constants.LOG_PLAY_2x:
-                          icon = Icon(
-                              Icons.stop,
-                              color: Colors.grey
-                          );
-                          status = "x4";
-                          break;
-                        case Constants.LOG_PLAY_MINUS_1x:
-                          icon = Icon(
-                              Icons.stop,
-                              color: Colors.grey
-                          );
-                          status = "x-1";
-                          break;
-                        case Constants.LOG_PLAY_MINUS_2x:
-                          icon = Icon(
-                              Icons.stop,
-                              color: Colors.grey
-                          );
-                          status = "x-2";
-                          break;
-                        case Constants.LOG_PLAY_MINUS_4x:
-                          icon = Icon(
-                              Icons.stop,
-                              color: Colors.grey
-                          );
-                          status = "x-4";
                           break;
                       }
                       return Row(
@@ -120,41 +83,98 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                         children: <Widget>[
                           Padding(
                             padding: const EdgeInsets.all(6),
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.fast_rewind,
-                                color: Colors.grey,
+                            child: Column(children:<Widget>[
+                              IconButton(
+                                icon: Icon(
+                                  Icons.fast_rewind,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () {
+                                  print("-1");
+                                  blocMap.downPlaySpeed();
+                                  },
                               ),
-                              onPressed: () {
-                              },
+                              StreamBuilder(
+                                stream: blocMap.onLogCurrentTime,
+                                builder: (context,currentTimeSnapshot){
+                                  if(currentTimeSnapshot.hasData){
+                                    DateTime date = currentTimeSnapshot.data;
+                                    var min = date.minute.toString();
+                                    var sec = date.second.toString();
+                                    if(date.minute<=9){
+                                      min = "0" + date.minute.toString();
+                                    }
+                                    if(date.second <= 9){
+                                      sec = "0" + date.second.toString();
+                                    }
+                                    return Text("${date.hour}:$min:$sec");
+                                  }else{
+                                    return Text("00:00:00");
+                                  }
+                                },
+                              ),
+                            ]
                             ),
                           ),
                           Expanded(child: new SizedBox()),
-                          Row(children: <Widget>[
+                          Column(children: <Widget>[
                             IconButton(
                               icon:icon,
                               onPressed: () {
-
-                                blocMap.logPlayerState.add(1);
-
+                                //blocMap.logPlayerState.add(stateSnapshot.data);
+                                blocMap.toggleLogPlaying();
                               },
                             ),
-                            Text(status),
+                            StreamBuilder(
+                              stream: blocMap.onLogPlayerSpeed,
+                              builder: (context,speedSnapshot){
+                                if(speedSnapshot.hasData){
+                                  return Text("x${speedSnapshot.data}",style: TextStyle(color: Colors.black));
+                                }else{
+                                  return SpaceBox(height: 1,width: 1);
+                                }
+                              },
+                            )
+                            //Text(status,style: TextStyle(color: Colors.grey),),
                           ],),
                           Expanded(child: new SizedBox()),
-                          IconButton(
-                            icon: Icon(
-                              Icons.fast_forward,
-                              color: Colors.grey,
+                          Column(children: <Widget>[
+                            IconButton(
+                              icon: Icon(
+                                Icons.fast_forward,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                blocMap.upPlaySpeed();
+                              },
                             ),
-                            onPressed: () {},
+                            StreamBuilder(
+                              stream: blocMap.onLogTotalTime,
+                              builder: (context,totalTimeSnapshot){
+                                if(totalTimeSnapshot.hasData){
+                                  DateTime date = totalTimeSnapshot.data;
+                                  var min = date.minute.toString();
+                                  var sec = date.second.toString();
+                                  if(date.minute<=9){
+                                    min = "0" + date.minute.toString();
+                                  }
+                                  if(date.second <= 9){
+                                    sec = "0" + date.second.toString();
+                                  }
+                                  return Text("${date.hour}:$min:$sec");
+                                }else{
+                                  return Text("00:00:00");
+                                }
+                              },
+                            ),
+                          ],
                           ),
                           SpaceBox(width: 10),
                         ],
                       );
                     },
                   ),
-
+                  SpaceBox(height: 5,),
                   Padding(
                     padding: EdgeInsets.only(right: 30,left: 30,bottom: 15),
                     child:StreamBuilder(
@@ -172,6 +192,20 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                           value: progress,
                           onProgressChanged: (value) {
                             blocMap.logPlayerProgress.add(value);
+                            progress = value;
+                          },
+                          onStartTrackingTouch: (){
+                            blocMap.stopLogPlaying();
+                            //blocMap.logPlayerState.add(Constants.LOG_PLAY_STOP);
+
+                            print("start");
+                          },
+                          onStopTrackingTouch: (){
+
+                            //blocMap.startLogPlaying();
+                            //blocMap.logPlayerState.add(Constants.LOG_PLAY_START);
+
+                            print("stop");
                           },
                         );
                       },
@@ -283,7 +317,32 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
           stream: blocMap.onLogPlayerVisibleChanged,
           builder: (context,stateSnapshot){
             if(stateSnapshot.data==true){
-              return SpaceBox(height: 0,width: 0);
+
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.all(5),
+                        child: FloatingActionButton(
+                          heroTag: null,
+                          backgroundColor: Colors.yellow,
+                          mini: true,
+                          child: new Icon(Icons.close, color: Colors.grey),
+                          onPressed: (){
+                            blocMap.logPlayerVisible.add(false);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+
+
+
             }else{
               return Column(
                 mainAxisSize: MainAxisSize.min,
@@ -303,15 +362,20 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                       ),
                       child: new FloatingActionButton(
                         heroTag: null,
-                        backgroundColor: Colors.pinkAccent,
+                        backgroundColor:  Colors.pinkAccent,
                         mini: true,
                         child: new Icon(icons[index], color: Colors.white),
                         onPressed: (){
-                          blocMap.createPolygon().then((_){
-                            blocMap.removeAreaByAreaName(Constants.DEFAULT_AREA_TABLE).then((_){
-                              blocMap.saveCurrentArea(Constants.DEFAULT_AREA_TABLE);
+                          print("icon index:"+index.toString());
+                          if(index==1){
+                            blocMap.createPolygon().then((_){
+                              blocMap.removeAreaByAreaName(Constants.DEFAULT_AREA_TABLE).then((_){
+                                blocMap.saveCurrentArea(Constants.DEFAULT_AREA_TABLE);
+                              });
                             });
-                          });
+                          }else if(index==0){
+                            blocMap.removeDraftPolygon();
+                          }
                           _controller.reverse();
                         },
                       ),

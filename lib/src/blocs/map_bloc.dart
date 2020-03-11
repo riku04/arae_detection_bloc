@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:async/async.dart';
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +14,11 @@ import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:flutter_map_app/src/utilities/helper.dart';
 import 'package:flutter_map_app/src/utilities/logger.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+//import 'package:fluttertoast/fluttertoast.dart';
 import 'package:latlong/latlong.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:vibration/vibration.dart';
+import 'dart:math' as math;
 
 class MapBloc extends Bloc {
   BuildContext context;
@@ -55,6 +58,8 @@ class MapBloc extends Bloc {
 
   bool isPolygonReady = false;
 
+  int _logPlaySpeed = 1;
+
   final StreamController<MapOptions> _optionsController =
       StreamController<MapOptions>();
   Sink<MapOptions> get initOptions => _optionsController.sink;
@@ -84,6 +89,10 @@ class MapBloc extends Bloc {
   Sink<int> get logPlayerState => _logPLayerStateController.sink;
   Stream<int> get onLogPlayerStateChanged => _logPLayerStateController.stream;
 
+  final _logPlayerSpeedController = StreamController<int>.broadcast();
+  Sink<int> get logPlayerSpeed => _logPlayerSpeedController.sink;
+  Stream<int> get onLogPlayerSpeed => _logPlayerSpeedController.stream;
+
   final _logPlayerProgressController = StreamController<double>.broadcast();
   Sink<double> get logPlayerProgress => _logPlayerProgressController.sink;
   Stream<double> get onLogPlayerProgressUpdated => _logPlayerProgressController.stream;
@@ -91,6 +100,10 @@ class MapBloc extends Bloc {
   final _logCurrentTimeController = StreamController<DateTime>();
   Sink<DateTime> get logCurrentTime => _logCurrentTimeController.sink;
   Stream<DateTime> get onLogCurrentTime => _logCurrentTimeController.stream;
+
+  final _logTotalTimeController = StreamController<DateTime>();
+  Sink<DateTime> get logTotalTime => _logTotalTimeController.sink;
+  Stream<DateTime> get onLogTotalTime => _logTotalTimeController.stream;
 
 
   void initMapOptions() {
@@ -148,6 +161,12 @@ class MapBloc extends Bloc {
       borderStrokeWidth: 1.0,
     ));
 
+    setLayers.add(layers);
+  }
+
+  void removeDraftPolygon(){
+    _draftPolygons.clear();
+    _draftMarkers.clear();
     setLayers.add(layers);
   }
 
@@ -303,13 +322,30 @@ class MapBloc extends Bloc {
 
     int cnt = 0;
     Future.doWhile((){
+
+      Color color;
+      switch(logData.datePoints[cnt].getStatus()){
+        case 0:
+          color = Colors.indigo;
+          break;
+        case 1:
+          color = Colors.red;
+          break;
+        case 2:
+          color = Colors.yellowAccent;
+          break;
+        case 3:
+          color = Colors.green;
+          break;
+      }
+
       Marker marker = Marker(
           point: logData.datePoints[cnt].getPoint(),
           anchorPos: AnchorPos.align(AnchorAlign.center),
           builder: (ctx) {
             return Icon(
               Icons.fiber_manual_record,
-              color: Colors.orange,
+              color: color,
               size: 10,
             );
           });
@@ -340,11 +376,167 @@ class MapBloc extends Bloc {
     print("log points:${_tempLogMarkers.length}");
     progressPeriod = 1.0 / _tempLogMarkers.length;
 
+    logTotalTime.add(_tempDateTime[_tempDateTime.length-1]);
+
   return;
   }
 
   void showLogPlayer(){
     logPlayerVisible.add(true);
+  }
+
+  CancelableOperation runner;
+  bool isPlayingLog = false;
+  void startLogPlaying(){
+    print("startLogPlaying");
+    isPlayingLog = true;
+    if(runner==null||runner.isCanceled){
+      logPlayerState.add(Constants.LOG_PLAY_START);
+      runner = CancelableOperation.fromFuture(
+        Future.doWhile(()async{
+
+
+          if(_logPlaySpeed>0) {
+            if (_logMarkers.length == _tempLogMarkers.length) {
+              runner.cancel();
+              return false;
+            }
+            if (_logMarkers.length == 0) {
+              _logMarkers.add(_tempLogMarkers[_logMarkers.length]);
+              setLayers.add(layers);
+              return true;
+            }
+
+            DateTime current = _tempDateTime[_logMarkers.length - 1];
+            DateTime next = _tempDateTime[_logMarkers.length];
+//            await Future.delayed(Duration(milliseconds: next.millisecondsSinceEpoch - current.millisecondsSinceEpoch));
+
+            num delay = (next.millisecondsSinceEpoch-current.millisecondsSinceEpoch)/_logPlaySpeed.abs();
+            int delayInt = delay.toInt();
+            await Future.delayed(Duration(milliseconds: delayInt));
+
+            _logMarkers.add(_tempLogMarkers[_logMarkers.length]);
+            setLayers.add(layers);
+
+            int totalTime = _tempDateTime[_tempDateTime.length - 1]
+                .millisecondsSinceEpoch -
+                _tempDateTime[0].millisecondsSinceEpoch;
+            int spentTime = _tempDateTime[_logMarkers.length - 1]
+                .millisecondsSinceEpoch -
+                _tempDateTime[0].millisecondsSinceEpoch;
+            double timeProgress = spentTime / totalTime;
+            logPlayerProgress.add(timeProgress);
+
+            print(
+                "marker:${_logMarkers.length},total:${_tempLogMarkers.length}");
+            return isPlayingLog;
+          }else if(_logPlaySpeed < 0){
+
+            if (_logMarkers.length == 1) {
+              //_logMarkers.removeLast();
+              setLayers.add(layers);
+              runner.cancel();
+              return false;
+            }
+
+            DateTime current = _tempDateTime[_logMarkers.length - 1];
+            DateTime before = _tempDateTime[_logMarkers.length - 2];
+
+            num delay = (current.millisecondsSinceEpoch-before.millisecondsSinceEpoch)/_logPlaySpeed.abs();
+            int delayInt = delay.toInt();
+
+            await Future.delayed(Duration(milliseconds: delayInt));
+            _logMarkers.removeLast();
+            setLayers.add(layers);
+
+            int totalTime = _tempDateTime[_tempDateTime.length - 1]
+                .millisecondsSinceEpoch -
+                _tempDateTime[0].millisecondsSinceEpoch;
+            int spentTime = _tempDateTime[_logMarkers.length - 1]
+                .millisecondsSinceEpoch -
+                _tempDateTime[0].millisecondsSinceEpoch;
+            double timeProgress = spentTime / totalTime;
+            logPlayerProgress.add(timeProgress);
+
+            print(
+                "marker:${_logMarkers.length},total:${_tempLogMarkers.length}");
+            return isPlayingLog;
+          }else{
+            return false;
+          }
+         }),
+          onCancel: (){
+            print("canceled");
+            logPlayerState.add(Constants.LOG_PLAY_STOP);
+          },
+      );
+    }
+  }
+
+  void upPlaySpeed(){
+    if(_logPlaySpeed==-4){
+      _logPlaySpeed = -2;
+      logPlayerSpeed.add(-2);
+    }
+    else if(_logPlaySpeed==-2){
+      _logPlaySpeed = -1;
+      logPlayerSpeed.add(-1);
+    }
+    else if(_logPlaySpeed==-1){
+      _logPlaySpeed = 1;
+      logPlayerSpeed.add(1);
+    }
+    else if(_logPlaySpeed==1){
+      _logPlaySpeed = 2;
+      logPlayerSpeed.add(2);
+    }else if(_logPlaySpeed==2){
+      _logPlaySpeed = 4;
+      logPlayerSpeed.add(4);
+    }
+    print("speed:$_logPlaySpeed");
+  }
+
+  void downPlaySpeed(){
+    if(_logPlaySpeed==4){
+      _logPlaySpeed = 2;
+      logPlayerSpeed.add(2);
+    }
+    else if(_logPlaySpeed==2){
+      _logPlaySpeed = 1;
+      logPlayerSpeed.add(1);
+    }
+    else if(_logPlaySpeed==1){
+      _logPlaySpeed = -1;
+      logPlayerSpeed.add(-1);
+    }
+    else if(_logPlaySpeed==-1){
+      _logPlaySpeed = -2;
+      logPlayerSpeed.add(-2);
+    }else if(_logPlaySpeed==-2){
+      _logPlaySpeed = -4;
+      logPlayerSpeed.add(-4);
+    }
+    print("speed:$_logPlaySpeed");
+  }
+
+  void setLogPlaySpeed(int speed){
+    _logPlaySpeed = speed;
+  }
+
+  void stopLogPlaying(){
+    print("stopLogPlaying");
+    if(runner!=null){
+      isPlayingLog = false;
+      runner.cancel();
+    }
+  }
+
+  void toggleLogPlaying(){
+    if(isPlayingLog==true){
+      stopLogPlaying();
+    }else{
+      startLogPlaying();
+    }
   }
 
   MapBloc(BuildContext context,AreaRepository areaRepository,UserSettingsRepository userSettingsRepository)  {
@@ -368,7 +560,7 @@ class MapBloc extends Bloc {
     onSettingsChanged.listen((settings) {
       print("settings changed");
       setLogger();
-      Fluttertoast.showToast(msg: "保存しました");
+      //Fluttertoast.showToast(msg: "保存しました");
     });
 
     FlutterBackgroundLocation.startLocationService();
@@ -449,42 +641,76 @@ class MapBloc extends Bloc {
       await _logger.addLog(DateTime.now(), point, result);
     });
 
+    logPlayerSpeed.add(1);
     logPlayerProgress.add(0.0);
     logPlayerState.add(Constants.LOG_PLAY_STOP);
     logPlayerVisible.add(false);
-    onLogPlayerProgressUpdated.listen((progress){
+
+    onLogPlayerProgressUpdated.listen((progress)async{
+      if(_logMarkers.length==0){
+        _logMarkers.add(_tempLogMarkers[0]);
+        setLayers.add(layers);
+        return;
+      }
+
+      int totalTime = _tempDateTime[_tempDateTime.length-1].millisecondsSinceEpoch - _tempDateTime[0].millisecondsSinceEpoch;
+      int spentTime = _tempDateTime[_logMarkers.length - 1].millisecondsSinceEpoch - _tempDateTime[0].millisecondsSinceEpoch;
+      double timeProgress = spentTime / totalTime;
+      double currentMarkerProgress = _logMarkers.length/_tempLogMarkers.length;
+
+      print("time:${timeProgress},progress:${progress}");
+
+      if(timeProgress<progress) {
+        await Future.doWhile(() {
+           _logMarkers.add(_tempLogMarkers[_logMarkers.length]);
+           if (_logMarkers.length / _tempLogMarkers.length <= progress || _logMarkers.length == _tempLogMarkers.length) {
+            print("marker:${_logMarkers.length},total:${_tempLogMarkers.length}");
+            return true;
+          } else {
+            return false;
+          }
+        });
+      }else if(timeProgress>progress){
+        await Future.doWhile(() {
+           _logMarkers.removeLast();
+           if (_logMarkers.length / _tempLogMarkers.length >= progress) {
+            print("marker:${_logMarkers.length},total:${_tempLogMarkers.length}");
+            return true;
+          } else {
+            return false;
+          }
+        });
+      }
+
+      _logLines.clear();
+      await Future.doWhile((){
+        if(_logLines.length<=_logMarkers.length-2){
+          _logLines.add(_tempLogLines[_logLines.length]);
+          return true;
+        }else{
+          return false;
+        }
+      });
+
+      logCurrentTime.add(_tempDateTime[_logMarkers.length-1]);
+      setLayers.add(layers);
       print(progress);
     });
 
+    onLogPlayerVisibleChanged.listen((visible){
+      if(visible == false){
 
-
-    bool isPlayingLog = false;
-    Future future;
-
-
-
-    onLogPlayerStateChanged.listen((state)async{
-
-      if(state == Constants.LOG_PLAY_STOP){
-        return false;
-      } else {
-        int cnt = 0;
-        if(future==null) {
-          future = Future.doWhile(() async {
-            if (cnt++ >= 100) {
-              return false;
-            } else {
-              await Future.delayed(
-                  Duration(milliseconds: 1000));
-              logPlayerProgress.add(cnt / 100);
-
-              return true;
-            }
-          });
-        }else{
-
+        if(runner!=null) {
+          runner.cancel();
         }
 
+        _logMarkers.clear();
+        _logLines.clear();
+        _logPolygons.clear();
+        _tempLogMarkers.clear();
+        _tempLogLines.clear();
+        _tempDateTime.clear();
+        setLayers.add(layers);
       }
     });
 
@@ -498,7 +724,9 @@ class MapBloc extends Bloc {
     _userSettingsController.close();
     _logPlayerVisibleController.close();
     _logPLayerStateController.close();
+    _logPlayerSpeedController.close();
     _logPlayerProgressController.close();
     _logCurrentTimeController.close();
+    _logTotalTimeController.close();
   }
 }

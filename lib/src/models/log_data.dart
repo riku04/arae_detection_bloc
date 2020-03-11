@@ -14,10 +14,12 @@ class DatePoint {
 
   DateTime _dateTime;
   LatLng _point;
+  int _status;
 
-  DatePoint(DateTime dateTime, LatLng point){
+  DatePoint(DateTime dateTime, LatLng point, int status){
     this._dateTime = dateTime;
     this._point = point;
+    this._status = status;
   }
 
   DateTime getDateTime(){
@@ -26,6 +28,10 @@ class DatePoint {
 
   LatLng getPoint(){
     return this._point;
+  }
+
+  int getStatus(){
+    return this._status;
   }
 
 }

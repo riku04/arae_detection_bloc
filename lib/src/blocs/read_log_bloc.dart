@@ -80,9 +80,11 @@ class ReadLogBloc extends Bloc{
           double latitude = double.parse(split[2]);
           double longitude = double.parse(split[3]);
 
+          int status = int.parse(split[4]);
+
           DateTime dateTime = DateTime(year,month,day,hour,min,sec);
 
-          logData.datePoints.add(DatePoint(dateTime,LatLng(latitude,longitude)));
+          logData.datePoints.add(DatePoint(dateTime,LatLng(latitude,longitude),status));
           //logs.add(LogData(dateTime,LatLng(latitude,longitude)));
 
         }

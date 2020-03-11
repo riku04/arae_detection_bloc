@@ -16,12 +16,12 @@ class Constants {
   static const num SEND_TYPE_SETTINGS = 0x02;
   static const num SEND_END = 0x99;
 
-  static const int LOG_INVALID = 99;
   static const int LOG_PLAY_STOP = 0;
-  static const int LOG_PLAY_1x = 1;
-  static const int LOG_PLAY_2x = 2;
-  static const int LOG_PLAY_4x = 4;
-  static const int LOG_PLAY_MINUS_1x = -1;
-  static const int LOG_PLAY_MINUS_2x = -2;
-  static const int LOG_PLAY_MINUS_4x = -4;
+  static const int LOG_PLAY_START = 10;
+  static const int LOG_PLAY_SPEED_1x = 1;
+  static const int LOG_PLAY_SPEED_2x = 2;
+  static const int LOG_PLAY_SPEED_4x = 4;
+  static const int LOG_PLAY_SPEED_MINUS_1x = -1;
+  static const int LOG_PLAY_SPEED_MINUS_2x = -2;
+  static const int LOG_PLAY_SPEED_MINUS_4x = -4;
 }
