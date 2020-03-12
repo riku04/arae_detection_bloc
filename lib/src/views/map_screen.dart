@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -246,7 +248,11 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                     Icons.location_searching,
                     color: Colors.white,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    if(blocMap.lastPoint!=null){
+                      _mapController.move(blocMap.lastPoint, _mapController.zoom);
+                    }
+                  },
                 ),
                 SpaceBox(width: 10),
               ],

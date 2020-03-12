@@ -57,8 +57,9 @@ class MapBloc extends Bloc {
   PolygonLayerOptions _logExpandedPolygonLayer;
 
   bool isPolygonReady = false;
-
   int _logPlaySpeed = 1;
+
+  LatLng lastPoint;
 
   final StreamController<MapOptions> _optionsController =
       StreamController<MapOptions>();
@@ -97,11 +98,11 @@ class MapBloc extends Bloc {
   Sink<double> get logPlayerProgress => _logPlayerProgressController.sink;
   Stream<double> get onLogPlayerProgressUpdated => _logPlayerProgressController.stream;
 
-  final _logCurrentTimeController = StreamController<DateTime>();
+  final _logCurrentTimeController = StreamController<DateTime>.broadcast();
   Sink<DateTime> get logCurrentTime => _logCurrentTimeController.sink;
   Stream<DateTime> get onLogCurrentTime => _logCurrentTimeController.stream;
 
-  final _logTotalTimeController = StreamController<DateTime>();
+  final _logTotalTimeController = StreamController<DateTime>.broadcast();
   Sink<DateTime> get logTotalTime => _logTotalTimeController.sink;
   Stream<DateTime> get onLogTotalTime => _logTotalTimeController.stream;
 
@@ -376,7 +377,9 @@ class MapBloc extends Bloc {
     print("log points:${_tempLogMarkers.length}");
     progressPeriod = 1.0 / _tempLogMarkers.length;
 
+    logCurrentTime.add(_tempDateTime[0]);
     logTotalTime.add(_tempDateTime[_tempDateTime.length-1]);
+    logPlayerProgress.add(0.0);
 
   return;
   }
@@ -601,6 +604,7 @@ class MapBloc extends Bloc {
     });
 
     onCurrentLocationChanged.listen((point) async {
+      lastPoint = point;
       int result = 0;
       _polygons.forEach((polygon) {
         if (polygonContainsPoint(polygon, point)) {
