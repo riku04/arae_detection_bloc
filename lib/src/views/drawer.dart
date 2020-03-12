@@ -2,6 +2,9 @@ import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
+import 'package:flutter_map_app/src/repository/area_repository.dart';
+import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
+import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:flutter_map_app/src/views/ble_peripheral_screen.dart';
 import 'package:flutter_map_app/src/widgets/space_box.dart';
 
@@ -110,6 +113,8 @@ class _MainDrawerState extends State<MainDrawer> {
                           child: Text("OK"),
                           onPressed: () {
                             blocMap.removeAllPolygons();
+                            AreaRepository().removeTable(Constants.DEFAULT_AREA_TABLE);
+                            AreaRepository().createNewTable(Constants.DEFAULT_AREA_TABLE);
                             Navigator.of(context).pop();
                           },
                         )

@@ -22,7 +22,7 @@ class App extends StatelessWidget {
     AreaRepository areaRepository = AreaRepository();
     UserSettingsRepository userSettingsRepository = UserSettingsRepository();
     return BlocProvider<MapBloc>(
-      creator: (context, _bag) => MapBloc(areaRepository,userSettingsRepository),
+      creator: (context, _bag) => MapBloc(context,areaRepository,userSettingsRepository),
       child: MaterialApp(
         home: SafeArea(
           child: Scaffold(

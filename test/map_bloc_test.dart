@@ -13,7 +13,7 @@ void main() {
   group("MapBloc", () {
     MapBloc bloc;
     setUp(() {
-      bloc = MapBloc(MockAreaRepository(),MockUserSettingsRepository());
+      bloc = MapBloc(null,MockAreaRepository(),MockUserSettingsRepository());
     });
 
     Polygon polygon = Polygon(points: [
@@ -22,7 +22,6 @@ void main() {
       LatLng(4.0, 4.0),
       LatLng(4.0, 0.0)
     ]);
-
 
     test("polygonContainsPoint(Polygon, LatLng) expect true", () {
       LatLng point = LatLng(2.0, 2.0);

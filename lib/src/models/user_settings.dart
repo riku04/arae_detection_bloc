@@ -105,6 +105,34 @@ class UserSettings {
     this.beaconLogIntervalSec = 3,
     this.beaconNameListString = ""
   });
+  
+  UserSettings fromJson(Map<String,dynamic> json){
+    this.userId = json["USER_ID"];
+    this.groupId = json["GROUP_ID"];
+    this.admin = json["ADMIN"];
+    this.enterAlertOn = json['ENTER_ALERT_ON'];
+    this.closeAlertOn = json['CLOSE_ALERT_ON'];
+    this.beaconAlertOn = json['BEACON_ALERT_ON'];
+    this.vibrationOn = json['VIBRATION_ON'];
+    this.loggingOn = json['LOGGING_ON'];
+    this.startHour = json['START_HOUR'];
+    this.startMinute = json['START_MINUTE'];
+    this.startLunchHour = json['START_LUNCH_HOUR'];
+    this.startLunchMinute = json['START_LUNCH_MINUTE'];
+    this.endLunchHour = json['END_LUNCH_HOUR'];
+    this.endLunchMinute = json['END_LUNCH_MINUTE'];
+    this.endHour = json['END_HOUR'];
+    this.endMinute = json['END_MINUTE'];
+    this.closeDistanceMeter = json['CLOSE_DISTANCE_METER'];
+    this.beaconCloseDistanceMeter = json['BEACON_CLOSE_DISTANCE_METER'];
+    this.logIntervalSec = json['LOG_INTERVAL_SEC'];
+    this.semiCloseLogIntervalSec = json['SEMI_CLOSE_LOG_INTERVAL_SEC'];
+    this.closeLogIntervalSec = json['CLOSE_LOG_INTERVAL_SEC'];
+    this.enterLogIntervalSec = json['ENTER_LOG_INTERVAL_SEC'];
+    this.beaconLogIntervalSec = json['BEACON_LOG_INTERVAL_SEC'];
+    this.beaconNameListString = json['BEACON_NAME'];
+    return this;
+  }
 
   UserSettings.toJson(Map<String, dynamic> json)
       : userId = json[USER_ID],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map_app/src/blocs/ble_peripheral_bloc.dart';
+import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/widgets/space_box.dart';
 
 class BlePeripheralScreen{
@@ -12,8 +13,10 @@ class BlePeripheralScreen{
 
   void startAdvertiseDialog(){
 
-    blePeripheralBloc = BlePeripheralBloc();
-    blePeripheralBloc.startAdvertise("fltr");
+    blePeripheralBloc = BlePeripheralBloc(context);
+    UserSettingsRepository().getTableData().then((settings){
+      blePeripheralBloc.startAdvertise("${settings["USER_ID"]},${settings["GROUP_ID"]}");
+    });
 
     Widget progress = Container(width: 1,height: 1,);
     progress = LinearProgressIndicator();
@@ -31,10 +34,16 @@ class BlePeripheralScreen{
                   stream: blePeripheralBloc.onStatus,
                   builder: (context, statusSnapshot){
                     if(statusSnapshot.hasData){
-                      return Center(child: Text(statusSnapshot.data,style: TextStyle(fontSize: 20.0,color: Colors.lightBlue),),);
+
+                      if(statusSnapshot.data=="complete"){
+                        Navigator.of(context).pop();
+                      }
+
+                      return Center(child: Text(statusSnapshot.data.toString(),style: TextStyle(fontSize: 20.0,color: Colors.lightBlue),),);
                     }else{
                       return SpaceBox(width:1,height:1);
                     }
+
                   },
                 ),
                 SpaceBox(height: 10,),

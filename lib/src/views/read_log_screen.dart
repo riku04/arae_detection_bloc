@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:flutter_map_app/src/blocs/read_area_bloc.dart';
 import 'package:flutter_map_app/src/blocs/read_log_bloc.dart';
+import 'package:flutter_map_app/src/models/log_data.dart';
 import 'package:flutter_map_app/src/widgets/space_box.dart';
 
 class ReadLogScreen extends StatefulWidget {
@@ -53,11 +56,47 @@ class _ReadLogScreenState extends State<ReadLogScreen> {
                             ),
                             padding: EdgeInsets.all(15.0),
                           ),
-                          onPressed: () {
+                          onPressed: (){
                             print("log name pressed:" + logSnapshot.data[index]);
-                            readLogBloc.openOnAnotherApp(logSnapshot.data[index]);
+
+                            readLogBloc.readLogDataByName(logSnapshot.data[index]).then((logData){
+                              print(logData);
+                              blocMap.setLogData(logData);
+                            });
+
+                            //readLogBloc.openOnAnotherApp(logSnapshot.data[index]);
                             //blocMap.readSavedArea(logSnapshot.data[index]);
-                            //Navigator.of(context).pop();
+
+                            Navigator.of(context).pop();
+                          },
+                          onLongPress: (){
+
+                            showDialog(
+                              context: context,
+                              builder: (_) {
+                                return AlertDialog(
+                                  title: Text("履歴データ削除"),
+                                  content:
+                                  Text(logSnapshot.data[index] + "を削除します"),
+                                  actions: <Widget>[
+                                    // ボタン領域
+                                    FlatButton(
+                                      child: Text("Cancel"),
+                                      onPressed: () => Navigator.pop(context),
+                                    ),
+                                    FlatButton(
+                                      child: Text("OK"),
+                                      onPressed: () {
+                                        print("delete pressed:" + logSnapshot.data[index]);
+                                        readLogBloc.removeLogByName(logSnapshot.data[index]);
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
                           },
                         ),
                         SpaceBox(
