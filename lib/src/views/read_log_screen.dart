@@ -29,111 +29,118 @@ class _ReadLogScreenState extends State<ReadLogScreen> {
     return SafeArea(
         child: Scaffold(
           appBar: AppBar(
-            title: Text("READ LOG DATA"),
+            title: Text("移動履歴確認"),
           ),
-          body: StreamBuilder<List<String>>(
+          body:StreamBuilder<List<String>>(
             stream: readLogBloc.onLogList,
             builder: (context, logSnapshot) {
               if (!logSnapshot.hasData) {
                 return Scaffold();
               }
+
               return ListView.builder(
                 itemBuilder: (BuildContext context, int index) {
                   return Column(mainAxisSize: MainAxisSize.max, children: <Widget>[
                     SpaceBox(
                       height: 2.0,
                     ),
-                    Row(
-                      children: <Widget>[
-                        SpaceBox(
-                          width: 5.0,
-                        ),
-                        OutlineButton(
-                          child: Padding(
-                            child: Text(
-                              logSnapshot.data[index],
-                              style: TextStyle(fontSize: 22.0),
-                            ),
-                            padding: EdgeInsets.all(15.0),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: <Widget>[
+                          SpaceBox(
+                            width: 5.0,
                           ),
-                          onPressed: (){
-                            print("log name pressed:" + logSnapshot.data[index]);
+                          OutlineButton(
+                            child: Padding(
+                              child: Text(
+                                logSnapshot.data[index],
+                                style: TextStyle(fontSize: 22.0),
+                              ),
+                              padding: EdgeInsets.all(15.0),
+                            ),
+                            onPressed: (){
+                              print("log name pressed:" + logSnapshot.data[index]);
 
-                            readLogBloc.readLogDataByName(logSnapshot.data[index]).then((logData){
-                              print(logData);
-                              blocMap.setLogData(logData);
-                            });
+                              readLogBloc.readLogDataByName(logSnapshot.data[index]).then((logData){
+                                print(logData);
+                                blocMap.setLogData(logData);
+                              });
 
-                            //readLogBloc.openOnAnotherApp(logSnapshot.data[index]);
-                            //blocMap.readSavedArea(logSnapshot.data[index]);
+                              //readLogBloc.openOnAnotherApp(logSnapshot.data[index]);
+                              //blocMap.readSavedArea(logSnapshot.data[index]);
 
-                            Navigator.of(context).pop();
-                          },
-                          onLongPress: (){
+                              Navigator.of(context).pop();
+                            },
+                            onLongPress: (){
 
-                            showDialog(
-                              context: context,
-                              builder: (_) {
-                                return AlertDialog(
-                                  title: Text("履歴データ削除"),
-                                  content:
-                                  Text(logSnapshot.data[index] + "を削除します"),
-                                  actions: <Widget>[
-                                    // ボタン領域
-                                    FlatButton(
-                                      child: Text("Cancel"),
-                                      onPressed: () => Navigator.pop(context),
-                                    ),
-                                    FlatButton(
-                                      child: Text("OK"),
-                                      onPressed: () {
-                                        print("delete pressed:" + logSnapshot.data[index]);
-                                        readLogBloc.removeLogByName(logSnapshot.data[index]);
-                                        Navigator.pop(context);
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                              readLogBloc.openOnAnotherApp(logSnapshot.data[index]);
 
-                          },
-                        ),
-                        SpaceBox(
-                          width: 5.0,
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (_) {
-                                return AlertDialog(
-                                  title: Text("履歴データ削除"),
-                                  content:
-                                  Text(logSnapshot.data[index] + "を削除します"),
-                                  actions: <Widget>[
-                                    // ボタン領域
-                                    FlatButton(
-                                      child: Text("Cancel"),
-                                      onPressed: () => Navigator.pop(context),
-                                    ),
-                                    FlatButton(
-                                      child: Text("OK"),
-                                      onPressed: () {
-                                        print("delete pressed:" + logSnapshot.data[index]);
-                                        readLogBloc.removeLogByName(logSnapshot.data[index]);
-                                        Navigator.pop(context);
-                                      },
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        )
-                      ],
+//                            showDialog(
+//                              context: context,
+//                              builder: (_) {
+//                                return AlertDialog(
+//                                  title: Text("履歴データ削除"),
+//                                  content:
+//                                  Text(logSnapshot.data[index] + "を削除します"),
+//                                  actions: <Widget>[
+//                                    // ボタン領域
+//                                    FlatButton(
+//                                      child: Text("Cancel"),
+//                                      onPressed: () => Navigator.pop(context),
+//                                    ),
+//                                    FlatButton(
+//                                      child: Text("OK"),
+//                                      onPressed: () {
+//                                        print("delete pressed:" + logSnapshot.data[index]);
+//                                        readLogBloc.removeLogByName(logSnapshot.data[index]);
+//                                        Navigator.pop(context);
+//                                      },
+//                                    ),
+//                                  ],
+//                                );
+//                              },
+//                            );
+
+                            },
+                          ),
+                          SpaceBox(
+                            width: 5.0,
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) {
+                                  return AlertDialog(
+                                    title: Text("履歴データ削除"),
+                                    content:
+                                    Text(logSnapshot.data[index] + "を削除します"),
+                                    actions: <Widget>[
+                                      // ボタン領域
+                                      FlatButton(
+                                        child: Text("Cancel"),
+                                        onPressed: () => Navigator.pop(context),
+                                      ),
+                                      FlatButton(
+                                        child: Text("OK"),
+                                        onPressed: () {
+                                          print("delete pressed:" + logSnapshot.data[index]);
+                                          readLogBloc.removeLogByName(logSnapshot.data[index]);
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          )
+                        ],
+                      ),
                     ),
+
                     SpaceBox(height: 2.0)
                   ]);
                 },

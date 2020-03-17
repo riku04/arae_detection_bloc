@@ -12,6 +12,7 @@ import 'package:flutter_map_app/src/repository/area_repository.dart';
 import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:flutter_map_app/src/utilities/helper.dart';
+import 'package:location_permissions/location_permissions.dart';
 
 class BleCentralBloc extends Bloc {
   FlutterBlue _flutterBlue;
@@ -41,16 +42,30 @@ class BleCentralBloc extends Bloc {
     deviceList.add(devices);
   }
 
-  void scan() {
+  void scan() async{
+
+    ServiceStatus serviceStatus = await LocationPermissions().checkServiceStatus();
+    if(serviceStatus == ServiceStatus.disabled){
+      print("location service:disabled");
+
+      //ダイアログで位置情報をONにするように表示
+
+      return;
+    }
+
+
     _flutterBlue
         .scan(
             scanMode: ScanMode.lowLatency,
             timeout: Duration(seconds: Constants.SCAN_TIMEOUT))
         .listen((result) {
-      //print(result.device.name);
-      //if ((result.device.name != "") && (!devices.contains(result.device))) {
 
-      if ((!devices.contains(result.device))) {
+          print("*************************");
+          print(result.device.name);
+
+      if ((result.device.name != "") && (!devices.contains(result.device))) {
+
+//      if ((!devices.contains(result.device))) {
 
         devices.add(result.device);
         print(result.device.name);
@@ -65,6 +80,7 @@ class BleCentralBloc extends Bloc {
       print("scan error");
       return;
     }, cancelOnError: true);
+    return;
   }
 
   void connect(BluetoothDevice device,String userId, String groupId) {

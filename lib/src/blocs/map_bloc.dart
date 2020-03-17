@@ -56,10 +56,15 @@ class MapBloc extends Bloc {
   PolygonLayerOptions _logPolygonLayer;
   PolygonLayerOptions _logExpandedPolygonLayer;
 
+  double _closeDistance = 10;
+
   bool isPolygonReady = false;
   int _logPlaySpeed = 1;
 
   LatLng lastPoint;
+
+  String groupIdString = "";
+  String userIdString = "";
 
   final StreamController<MapOptions> _optionsController =
       StreamController<MapOptions>();
@@ -78,7 +83,7 @@ class MapBloc extends Bloc {
   Sink<LatLng> get addCurrentLocation => _currentLocationController.sink;
   Stream<LatLng> get onCurrentLocationChanged => _currentLocationController.stream;
 
-  final _userSettingsController = StreamController<Map<String,dynamic>>();
+  final _userSettingsController = StreamController<Map<String,dynamic>>.broadcast();
   Sink<Map<String,dynamic>> get settings => _userSettingsController.sink;
   Stream<Map<String,dynamic>> get onSettingsChanged => _userSettingsController.stream;
 
@@ -287,6 +292,75 @@ class MapBloc extends Bloc {
     return (depth & 1) == 1;
   }
 
+  bool polygonCloserPoint(Polygon polygon, LatLng point, double distance){
+    bool closer = false;
+
+    double rad = 0;
+    const double addition = 0.1;
+
+    while(rad<=2){
+
+      LatLng rotated = LatLng(point.latitude,point.longitude);
+      double r = 0.0;
+
+      while(calcDistance(point, rotated)<=distance){
+        double lat = point.latitude + r * math.sin(rad * math.pi);
+        double lon = point.longitude + r * math.cos(rad * math.pi);
+        rotated = LatLng(lat,lon);
+        r+=0.000001;
+      }
+
+//      Marker marker = Marker(
+//          point: rotated,
+//          anchorPos: AnchorPos.align(AnchorAlign.center),
+//          builder: (ctx) {
+//            return Icon(
+//              Icons.fiber_manual_record,
+//              color: Colors.lightBlueAccent,
+//              size: 10,
+//            );
+//          }
+//      );
+//      _markers.add(marker);
+//      setLayers.add(layers);
+
+//      print(calcDistance(point, rotated));
+//      print(rotated);
+
+      if(polygonContainsPoint(polygon, rotated)){
+        closer = true;
+        break;
+      }
+
+      rad += addition;
+    }
+    //print("close?:$closer");
+    return closer;
+  }
+
+  double calcDistance(LatLng p1, LatLng p2){
+    final double GRS80_A = 6378137.000;//長半径 a(m)
+    final double GRS80_E2 = 0.00669438002301188;//第一遠心率  eの2乗
+    double lon1 = p1.longitude;
+    double lat1 = p1.latitude;
+    double lon2 = p2.longitude;
+    double lat2 = p2.latitude;
+    double my = degToRadian((lat1 + lat2) / 2.0); //緯度の平均値
+    double dy = degToRadian(lat1 - lat2); //緯度の差
+    double dx = degToRadian(lon1 - lon2); //経度の差
+    //卯酉線曲率半径を求める(東と西を結ぶ線の半径)
+    double sinMy = math.sin(my);
+    double w = math.sqrt(1.0 - GRS80_E2 * sinMy * sinMy);
+    double n = GRS80_A / w;
+    //子午線曲線半径を求める(北と南を結ぶ線の半径)
+    double mnum = GRS80_A * (1 - GRS80_E2);
+    double m = mnum / (w * w * w);
+    //ヒュベニの公式
+    double dym = dy * m;
+    double dxncos = dx * n * math.cos(my);
+    return math.sqrt(dym * dym + dxncos * dxncos);
+  }
+
   //when userSettings or polygons changed call this to refresh the logger
   void setLogger() async{
     await _logger.initLogger(_polygons,await _userSettingsRepository.getTableData());
@@ -324,16 +398,17 @@ class MapBloc extends Bloc {
     int cnt = 0;
     Future.doWhile((){
 
+      //outside 0, close 1, inside 2
       Color color;
       switch(logData.datePoints[cnt].getStatus()){
         case 0:
-          color = Colors.indigo;
+          color = Colors.lightBlue;
           break;
         case 1:
-          color = Colors.red;
+          color = Colors.orange;
           break;
         case 2:
-          color = Colors.yellowAccent;
+          color = Colors.pink;
           break;
         case 3:
           color = Colors.green;
@@ -560,16 +635,35 @@ class MapBloc extends Bloc {
 
     _logger = Logger();
     setLogger();
+
+    UserSettingsRepository().getTableData().then((settings){
+      this.userIdString = settings["USER_ID"];
+      this.groupIdString = settings["GROUP_ID"];
+      _closeDistance = settings["CLOSE_DISTANCE_METER"];
+    });
+
     onSettingsChanged.listen((settings) {
       print("settings changed");
       setLogger();
+      this.userIdString = settings["USER_ID"];
+      this.groupIdString = settings["GROUP_ID"];
+      _closeDistance = settings["CLOSE_DISTANCE_METER"];
       //Fluttertoast.showToast(msg: "保存しました");
     });
 
+    LatLng oldPoint = LatLng(0,0);//geoLocationUpdatesで同じ座標が複数回連続で呼ばれる問題対策
     FlutterBackgroundLocation.startLocationService();
     FlutterBackgroundLocation.getLocationUpdates((point){
       print("point: ${point.latitude},${point.longitude}");
+
+      if(oldPoint.latitude==point.latitude
+      &&oldPoint.longitude==point.longitude){
+        return;
+      }
       addCurrentLocation.add(LatLng(point.latitude,point.longitude));
+      oldPoint.latitude = point.latitude;
+      oldPoint.longitude = point.longitude;
+
     });
 
     onAddPoint.listen((point) {
@@ -602,19 +696,22 @@ class MapBloc extends Bloc {
         print(isPolygonReady);
       }
     });
-
+    //outside 0, close 1, inside 2
     onCurrentLocationChanged.listen((point) async {
       lastPoint = point;
       int result = 0;
       _polygons.forEach((polygon) {
         if (polygonContainsPoint(polygon, point)) {
           print("inside");
+          result = 2;
+        }else if(polygonCloserPoint(polygon, point, _closeDistance)){
+          print("close");
           result = 1;
         } else {
           print("outside");
         }
       });
-      if (result==1) {
+      if (result==2) {
         Vibration.hasVibrator().then((bool) {
           if (bool) {
             Vibration.vibrate();
@@ -625,24 +722,45 @@ class MapBloc extends Bloc {
           builder: (ctx) {
             return Icon(
               Icons.location_on,
-              color: Colors.yellowAccent,
+              color: Colors.pink,
             );
           },
           anchorPos: AnchorPos.align(AnchorAlign.top),
         ));
         setLayers.add(layers);
-      } else {
+      } else if(result == 1) {
+
+        Vibration.hasVibrator().then((bool) {
+          if (bool) {
+            Vibration.vibrate();
+          }
+        });
+        _markers.add(Marker(
+          point: point,
+          builder: (ctx) {
+            return Icon(
+              Icons.location_on,
+              color: Colors.orange,
+            );
+          },
+          anchorPos: AnchorPos.align(AnchorAlign.top),
+        ));
+        setLayers.add(layers);
+
+      }else{
         _markers.add(Marker(
             point: point,
             builder: (ctx) {
               return Icon(
                 Icons.location_on,
-                color: Colors.green,
+                color: Colors.lightBlue,
               );
             }));
         setLayers.add(layers);
       }
+
       await _logger.addLog(DateTime.now(), point, result);
+
     });
 
     logPlayerSpeed.add(1);
@@ -717,7 +835,6 @@ class MapBloc extends Bloc {
         setLayers.add(layers);
       }
     });
-
 
   }
   @override

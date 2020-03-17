@@ -40,7 +40,7 @@ dependencies:
   seekbar: ^0.0.2
   async: ^2.4.0
   rxdart: ^0.22.0
-
+  location_permissions: ^2.0.5
 
 
   flutter_ble_peripheral:
