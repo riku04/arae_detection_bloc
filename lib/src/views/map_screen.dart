@@ -349,6 +349,12 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                               ),
                               actions: <Widget>[
                                 FlatButton(
+                                  child: Text("Cancel"),
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                                FlatButton(
                                   child: Text("Search"),
                                   onPressed: () async {
                                     await blocMap.searchAndMoveToPlace(key);
