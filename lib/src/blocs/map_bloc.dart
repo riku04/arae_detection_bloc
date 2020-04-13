@@ -19,6 +19,7 @@ import 'package:flutter_map_app/src/utilities/helper.dart';
 import 'package:flutter_map_app/src/utilities/logger.dart';
 import 'package:flutter_map_app/src/widgets/space_box.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoder/geocoder.dart';
 //import 'package:fluttertoast/fluttertoast.dart';
 import 'package:latlong/latlong.dart';
@@ -1023,8 +1024,6 @@ class MapBloc extends Bloc {
     onAlertEnableChanged.listen((bool){
       this.isAlertEnable = bool;
     });
-
-
   }
 
   Future<void> searchAndMoveToPlace(String key) async {
@@ -1033,11 +1032,16 @@ class MapBloc extends Bloc {
     }
     final query = key;
     isSearching.add(true);
-    var addresses = await Geocoder.local.findAddressesFromQuery(query);
-    isSearching.add(false);
-    var first = addresses.first;
-    _mapController.move(LatLng(first.coordinates.latitude,first.coordinates.longitude), _mapController.zoom);
-    print("${first.featureName} : ${first.coordinates}");
+    try {
+      var addresses = await Geocoder.local.findAddressesFromQuery(query);
+      isSearching.add(false);
+      var first = addresses.first;
+      _mapController.move(LatLng(first.coordinates.latitude,first.coordinates.longitude), _mapController.zoom);
+      print("${first.featureName} : ${first.coordinates}");
+    }catch(e){
+      Fluttertoast.showToast(msg: e.toString());
+      print(e.toString());
+    }
     return;
   }
 
