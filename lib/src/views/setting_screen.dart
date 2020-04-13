@@ -28,7 +28,7 @@ class _SettingScreenState extends State<SettingScreen> {
 
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(title: Text("SETTING"),
+        appBar: AppBar(title: Text("設定"),
         actions: <Widget>[
           StreamBuilder(
             stream: blocSetting.onSaveActivated,
@@ -320,7 +320,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     ),
                   ),
                   Container(
-                    height: 60,
+                    height: 160,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
@@ -328,7 +328,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         Text("接近判定距離"),
                         //SpaceBox(width: 20,),
                         Container(
-                          height: 60,
+                          height: 160,
                           width: 120,
                           child: Row(children: <Widget>[
                             StreamBuilder(
@@ -340,9 +340,10 @@ class _SettingScreenState extends State<SettingScreen> {
                                       minValue: 0,
                                       maxValue: 100,
                                       listViewWidth: 40,
-                                      highlightSelectedValue: false,
+                                      highlightSelectedValue: true,
                                       onChanged: (meter){
                                         blocSetting.setTempCloseDistanceMeter(meter-1);
+                                        blocSetting.closeDistanceMeter.add(meter-1);
                                       }
                                   );
                                 }else{
