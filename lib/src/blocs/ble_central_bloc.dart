@@ -19,6 +19,7 @@ class BleCentralBloc extends Bloc {
   List<BluetoothDevice> devices;
   bool isScanning = false;
   BluetoothDevice connectedDevice;
+  BuildContext context;
 
   final _scanResultController = StreamController<List<BluetoothDevice>>();
   Sink<List<BluetoothDevice>> get deviceList => _scanResultController.sink;
@@ -49,6 +50,23 @@ class BleCentralBloc extends Bloc {
       print("location service:disabled");
 
       //ダイアログで位置情報をONにするように表示
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("位置情報が無効になっています"),
+              content: Text("位置情報を有効化してやり直してください"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("OK"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+
 
       return;
     }
@@ -220,7 +238,8 @@ class BleCentralBloc extends Bloc {
     return;
   }
 
-  BleCentralBloc() {
+  BleCentralBloc(BuildContext context) {
+    this.context = context;
     devices = new List();
     updateDeviceList();
 

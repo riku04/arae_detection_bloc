@@ -139,6 +139,7 @@ class _MainDrawerState extends State<MainDrawer> {
                   });
             },
           ),
+          Divider(),
           FlatButton(
             child: Row(children: [
               SpaceBox(width: 16),
@@ -164,6 +165,7 @@ class _MainDrawerState extends State<MainDrawer> {
 //              Navigator.pushNamed(context, '/ble-peripheral-screen');
             },
           ),
+          Divider(),
           FlatButton(
             child: Row(children: [
               SpaceBox(width: 16),
@@ -176,6 +178,7 @@ class _MainDrawerState extends State<MainDrawer> {
               Navigator.pushNamed(context, '/read-log-screen');
             },
           ),
+          Divider(),
           FlatButton(
             child: Row(children: [
               SpaceBox(width: 16),

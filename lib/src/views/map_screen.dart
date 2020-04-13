@@ -14,6 +14,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'dart:math' as math;
 
 import 'package:seekbar/seekbar.dart';
+import 'package:vibration/vibration.dart';
 
 
 class MapScreen extends StatefulWidget {
@@ -42,9 +43,37 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
   build(BuildContext context) {
     final blocMap = BlocProvider.of<MapBloc>(context);
 
+    blocMap.setMapController(_mapController);
+
     blocMap.initLayers();
     blocMap.initMapOptions();
     blocMap.readSavedArea(Constants.DEFAULT_AREA_TABLE);
+
+
+    blocMap.onSelectPolygon.listen((polygon){
+      Vibration.hasVibrator().then((bool) {
+        if (bool) {
+          Vibration.vibrate(duration: 50);
+        }
+      });
+      print("polygon pressed");
+      showDialog(
+          context: context,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text(""),
+              children: <Widget>[
+                SimpleDialogOption(
+                  child: Text("削除"),
+                  onPressed: (){
+                    blocMap.removePolygon(polygon);
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
+          });
+    });
 
     return Scaffold(
 
@@ -230,28 +259,92 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
 
-            Padding(
-              padding: const EdgeInsets.all(6),
-              child: IconButton(
-                icon: Icon(
-                  Icons.menu,
-                  color: Colors.white,
+                Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.menu,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      Scaffold.of(this.context).openDrawer();
+                      },
+                  ),
                 ),
-                onPressed: () {
-                  Scaffold.of(this.context).openDrawer();
-                },
-              ),
-            ),
-                new Expanded(child: new SizedBox()),
+
+                Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: IconButton(
+                    icon: StreamBuilder(
+                    stream: blocMap.onAlertEnableChanged,
+                    builder: (context,alertEnableSnapshot){
+                      if(alertEnableSnapshot.hasData){
+                        print("alert enable changed: ${alertEnableSnapshot.data}");
+                        if(alertEnableSnapshot.data){
+                          return Icon(
+                            Icons.alarm_on,
+                            color: Colors.white,
+                          );
+                        }else{
+                          return Icon(
+                            Icons.alarm_off,
+                            color: Colors.white,
+                          );
+                        }
+                      }else{
+                        return Icon(
+                          Icons.alarm_off,
+                          color: Colors.white,
+                        );
+                      }
+
+                    }),
+                    onPressed: () {
+                      blocMap.toggleAlertEnable();
+                      },
+                  ),
+                ),
+
+                Expanded(child: new SizedBox()),
                 IconButton(
-                  icon: Icon(
-                    Icons.location_searching,
-                    color: Colors.white,
+                  icon: Stack(
+                    children: <Widget>[
+                      Center(
+                        child:StreamBuilder(
+                          stream: blocMap.onCalcLocationChanged,
+                          builder: (context,calcStateSnapshot){
+                            if(calcStateSnapshot.hasData){
+
+//                              Future.delayed(Duration(seconds: 10),(){
+//                                blocMap.calcLocation.add(false);
+//                              });
+
+                              if(calcStateSnapshot.data == true){
+                                return CircularProgressIndicator(backgroundColor: Colors.pinkAccent,strokeWidth: 3,);
+                              }else{
+                                return SpaceBox(height: 1,width: 1,);
+                              }
+                            }else{
+                              return SpaceBox(height: 1,width: 1,);
+                            }
+                        },
+                        )
+                      ),
+                      Center(
+                        child:Icon(
+                          Icons.location_searching,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                   onPressed: () {
-                    if(blocMap.lastPoint!=null){
-                      _mapController.move(blocMap.lastPoint, _mapController.zoom);
-                    }
+                    blocMap.calcLocation.add(true);
+                    blocMap.onCurrentLocationChanged.listen((point){
+                      if(blocMap.isCalcLocationEnable) {
+                        _mapController.move(point, _mapController.zoom);
+                      }
+                    });
                   },
                 ),
                 SpaceBox(width: 10),
@@ -263,58 +356,46 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
       ),
 
 
-//        bottomNavigationBar: BottomAppBar(
-//            elevation: 9.0,
-//            //shape: CircularNotchedRectangle(),
-//            color: Colors.lightBlue,
-//            //notchMargin: 8.0,
-//
-//            child: new Row(
-//              mainAxisSize: MainAxisSize.max,
-//              children: <Widget>[
-//
-//            Padding(
-//              padding: const EdgeInsets.all(6),
-//              child: IconButton(
-//                icon: Icon(
-//                  Icons.menu,
-//                  color: Colors.white,
-//                ),
-//                onPressed: () {
-//                  Scaffold.of(this.context).openDrawer();
-//                },
-//              ),
-//            ),
-//                new Expanded(child: new SizedBox()),
-//                IconButton(
-//                  icon: Icon(
-//                    Icons.location_searching,
-//                    color: Colors.white,
-//                  ),
-//                  onPressed: () {},
-//                ),
-//                SpaceBox(width: 10),
-//              ],
-//            )
-//        ),
 
 
-        body: Container(
-          child: StreamBuilder<MapOptions>(
-            stream: blocMap.onInitOptions,
-            builder: (context, optionsSnapshot) {
-              return StreamBuilder<List<LayerOptions>>(
-                stream: blocMap.onLayersChanged,
-                builder: (context, layersSnapshot) {
-                  return FlutterMap(
-                    options: optionsSnapshot.data,
-                    mapController: _mapController,
-                    layers: layersSnapshot.data,
+        body: Stack(
+          children: <Widget>[
+            Container(
+              child: StreamBuilder<MapOptions>(
+                stream: blocMap.onInitOptions,
+                builder: (context, optionsSnapshot) {
+                  return StreamBuilder<List<LayerOptions>>(
+                    stream: blocMap.onLayersChanged,
+                    builder: (context, layersSnapshot) {
+                      return FlutterMap(
+                        options: optionsSnapshot.data,
+                        mapController: _mapController,
+                        layers: layersSnapshot.data,
+                      );
+                      },
                   );
-                },
-              );
-            },
-          ),
+                  },
+              ),
+            ),
+
+            Center(child: Icon(Icons.add_circle_outline,size: 40.0,),),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    Text(
+                      "©︎OpenStreetMap contributors",
+                      style: TextStyle(fontSize: 10),
+                    )
+                  ],
+                )
+              ],
+            ),
+
+
+          ],
         ),
 
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -325,22 +406,63 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
             if(stateSnapshot.data==true){
 
               return Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   Column(
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.all(5),
-                        child: FloatingActionButton(
-                          heroTag: null,
-                          backgroundColor: Colors.yellow,
-                          mini: true,
-                          child: new Icon(Icons.close, color: Colors.grey),
-                          onPressed: (){
-                            blocMap.logPlayerVisible.add(false);
-                          },
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          SpaceBox(height: 1,width: 100,),
+                          Card(
+                            child: Padding(
+                                padding: EdgeInsets.all(10),
+                                child: StreamBuilder(
+                                  stream: blocMap.onLogStatusChanged,
+                                  builder: (context,logStatusSnapshot){
+                                    if(logStatusSnapshot.hasData){
+                                      if(logStatusSnapshot.data == Constants.OUTSIDE){
+                                        return Text("判定：領域外",
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                backgroundColor: Colors.greenAccent
+                                            )
+                                        );
+                                      }else if(logStatusSnapshot.data == Constants.CLOSE){
+                                        return Text("判定：領域接近",
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                backgroundColor: Colors.yellowAccent
+                                            )
+                                        );
+                                      }else if(logStatusSnapshot.data == Constants.INSIDE){
+                                        return Text("判定：領域内",
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                backgroundColor: Colors.pinkAccent
+                                            )
+                                        );
+                                      }
+                                    }
+                                  return Text("STATUS",style: TextStyle(fontSize: 40));
+                              },)
+                            ),
+                          ),
+                          SpaceBox(width: 30,),
+                          Padding(
+                            padding: EdgeInsets.all(5),
+                            child: FloatingActionButton(
+                              heroTag: null,
+                              backgroundColor: Colors.yellow,
+                              mini: true,
+                              child: new Icon(Icons.close, color: Colors.grey),
+                              onPressed: (){
+                                blocMap.logPlayerVisible.add(false);
+                                },
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

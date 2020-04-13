@@ -10,27 +10,44 @@ import 'package:path_provider/path_provider.dart';
 class ReadLogBloc extends Bloc{
 
   String path;
+  List<int> sizes = List();
 
-  final _logListController = StreamController<List<String>>();
-  Sink<List<String>> get logList => _logListController.sink;
-  Stream<List<String>> get onLogList => _logListController.stream;
+  final _logListController = StreamController<List<List<String>>>.broadcast();
+  Sink<List<List<String>>> get logList => _logListController.sink;
+  Stream<List<List<String>>> get onLogList => _logListController.stream;
 
-  void updateLogList() async{
+  Future<void> updateLogList() async{
     Directory directory = await getApplicationDocumentsDirectory();
     List<FileSystemEntity> files = directory.listSync();
-    List<String> fileList = List();
+
+    List<List<String>> fileList = List();
+    List<String> nameList = List();
+    List<int> sizes = List();
+
     files.forEach((file) {
       if(file.path.contains(".csv")) {
-        fileList.add(file.path.split("/")[file.path.split("/").length-1]);
+        nameList.add(file.path.split("/")[file.path.split("/").length-1]);
         print(file.path);
       }
     });
     
-    fileList.sort((a,b){
+    nameList.sort((a,b){
       return b.compareTo(a);
     });
 
+    await Future.forEach(nameList, (name)async{
+      int s = await getFileSizeKbByName(name);
+      s = s~/1024;
+      sizes.add(s);
+    });
+
+    for(int i = 0; i<= nameList.length-1; i++){
+      fileList.add([nameList[i],sizes[i].toString()]);
+    }
+
     logList.add(fileList);
+
+    return;
   }
 
   Future<void> openOnAnotherApp(String filename) async{
@@ -91,9 +108,14 @@ class ReadLogBloc extends Bloc{
         break;
       }
     }
-
     return logData;
+  }
 
+  Future<int> getFileSizeKbByName(String filename)async{
+    Directory directory = await getApplicationDocumentsDirectory();
+    String path = directory.path +"/"+ filename;
+    File file = File(path);
+    return await file.length();
   }
 
   Future<void> removeLogByName(String filename) async{
@@ -106,9 +128,10 @@ class ReadLogBloc extends Bloc{
     return;
   }
 
-
   ReadLogBloc(){
     updateLogList();
+    onLogList.listen((_){
+    });
   }
 
   @override
