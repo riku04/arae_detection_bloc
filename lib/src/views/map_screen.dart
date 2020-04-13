@@ -306,6 +306,63 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                 ),
 
                 Expanded(child: new SizedBox()),
+                Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.search,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      String key = "";
+                      showDialog(
+                          barrierDismissible: false,
+                          context: this.context,
+                          builder: (context){
+                            return AlertDialog(
+                              content: Container(
+                                height: 80,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    TextField(
+                                      onChanged: (string){
+                                        key = string;
+                                      },
+                                    ),
+                                    StreamBuilder(
+                                      stream: blocMap.onIsSearchingChanged,
+                                      builder: (context,isSearchingsnapshot){
+                                        if(isSearchingsnapshot.hasData){
+                                          if(isSearchingsnapshot.data == true){
+                                            return LinearProgressIndicator();
+                                          }else{
+                                            return SpaceBox(height: 1,width: 1,);
+                                          }
+                                        }else{
+                                          return SpaceBox(height: 1,width: 1,);
+                                        }
+                                      },
+                                    )
+                                  ],
+                                ),
+                              ),
+                              actions: <Widget>[
+                                FlatButton(
+                                  child: Text("Search"),
+                                  onPressed: () async {
+                                    await blocMap.searchAndMoveToPlace(key);
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
+                            );
+                          }
+                      );
+                    },
+                  ),
+                ),
+
                 IconButton(
                   icon: Stack(
                     children: <Widget>[

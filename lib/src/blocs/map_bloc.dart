@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:bloc_provider/bloc_provider.dart';
@@ -15,7 +17,9 @@ import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:flutter_map_app/src/utilities/helper.dart';
 import 'package:flutter_map_app/src/utilities/logger.dart';
+import 'package:flutter_map_app/src/widgets/space_box.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:geocoder/geocoder.dart';
 //import 'package:fluttertoast/fluttertoast.dart';
 import 'package:latlong/latlong.dart';
 import 'package:rxdart/rxdart.dart';
@@ -147,6 +151,10 @@ class MapBloc extends Bloc {
   final _selectPolygonController = StreamController<Polygon>.broadcast();
   Sink<Polygon> get selectPolygon => _selectPolygonController.sink;
   Stream<Polygon> get onSelectPolygon => _selectPolygonController.stream;
+
+  final _isSearchingContoller = StreamController<bool>.broadcast();
+  Sink<bool> get isSearching => _isSearchingContoller.sink;
+  Stream<bool> get onIsSearchingChanged => _isSearchingContoller.stream;
 
   void initMapOptions() {
     MapOptions _mapOptions = new MapOptions(
@@ -1016,6 +1024,21 @@ class MapBloc extends Bloc {
       this.isAlertEnable = bool;
     });
 
+
+  }
+
+  Future<void> searchAndMoveToPlace(String key) async {
+    if(key==""){
+      return;
+    }
+    final query = key;
+    isSearching.add(true);
+    var addresses = await Geocoder.local.findAddressesFromQuery(query);
+    isSearching.add(false);
+    var first = addresses.first;
+    _mapController.move(LatLng(first.coordinates.latitude,first.coordinates.longitude), _mapController.zoom);
+    print("${first.featureName} : ${first.coordinates}");
+    return;
   }
 
   void removePolygon(polygon){
@@ -1027,10 +1050,6 @@ class MapBloc extends Bloc {
       });
       setLogger();
     }
-  }
-
-  void showPolygonDialog(){
-
   }
 
   void toggleAlertEnable(){
@@ -1053,5 +1072,6 @@ class MapBloc extends Bloc {
     _logStatusController.close();
     _calcLocationController.close();
     _selectPolygonController.close();
+    _isSearchingContoller.close();
   }
 }

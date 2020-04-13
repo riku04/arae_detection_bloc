@@ -43,6 +43,7 @@ dependencies:
   location_permissions: ^2.0.5
   soundpool: ^1.0.1
   flutter_ringtone_player: ^2.0.0
+  geocoder: ^0.2.1
 
 
   flutter_ble_peripheral:
@@ -63,6 +64,7 @@ flutter:
   assets:
    - sounds/pii.mp3
    - sounds/pupu.mp3
+   - assets/res/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
