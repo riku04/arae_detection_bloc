@@ -30,64 +30,57 @@ class _SettingScreenState extends State<SettingScreen> {
       child: Scaffold(
         appBar: AppBar(title: Text("SETTING"),
         actions: <Widget>[
-          FlatButton(
-            child: Text("保存",style: TextStyle(color: Colors.white),),
-            onPressed: (){
-              print("setting save pressed");
-              blocSetting.save().then((settings){
-                mapBloc.settings.add(settings);
-
-              });
+          StreamBuilder(
+            stream: blocSetting.onSaveActivated,
+            builder: (context,saveActivatedSnapshot){
+              if(saveActivatedSnapshot.hasData){
+                if(saveActivatedSnapshot.data==true) {
+                  return FlatButton(
+                    child: Text("保存", style: TextStyle(color: Colors.white),),
+                    onPressed: () {
+                      print("setting save pressed");
+                      blocSetting.save().then((settings) {
+                        if (settings.length != 0) {
+                          mapBloc.settings.add(settings);
+                        }
+                      });
+                    },
+                  );
+                }else{
+                  return FlatButton(
+                    child: Text("保存",style: TextStyle(color: Colors.grey),),
+                  );
+                }
+              }else{
+                return FlatButton(
+                  child: Text("保存",style: TextStyle(color: Colors.grey),),
+                );
+              }
             },
-          )
+          ),
+
         ],),
         body:ListView(
           scrollDirection: Axis.vertical,
           children: <Widget>[
-
             SpaceBox(height: 10,),
             ExpandablePanel(
-              header: Center(child: Text("ユーザー設定")),
+              header: Center(
+                  child: Text(
+                    "ユーザー設定",
+                    style: TextStyle(color: Colors.lightBlue),
+                  )
+              ),
               expanded: Column(
                 children: <Widget>[
                   Container(
                     height: 60,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        SpaceBox(width: 20,),
-                        Text("USER ID"),
-                        SpaceBox(width: 20,),
-                        Container(
-                          height: 60,
-                          width: 120,
-                          child: StreamBuilder(
-                            stream: blocSetting.onUserId,
-                            builder: (context,snapshot){
-                              print("data:"+snapshot.data.toString());
-                              if(snapshot.hasData) {
-                                return TextFormField(
-                                  initialValue: snapshot.data,
-                                  onChanged: (string){
-                                    print(string);
-                                    blocSetting.setTempUserId(string);
-                                  },
-                                );
-                              }else{
-                                return Container();
-                              }
-                            },
-                          )
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                    height: 60,
-                    child: Row(
-                      children: <Widget>[
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
                         Text("GROUP ID"),
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
                         Container(
                           height: 60,
                           width: 120,
@@ -115,10 +108,43 @@ class _SettingScreenState extends State<SettingScreen> {
                   Container(
                     height: 60,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
+                        Text("USER ID"),
+                        //SpaceBox(width: 20,),
+                        Container(
+                            height: 60,
+                            width: 120,
+                            child: StreamBuilder(
+                              stream: blocSetting.onUserId,
+                              builder: (context,snapshot){
+                                print("data:"+snapshot.data.toString());
+                                if(snapshot.hasData) {
+                                  return TextFormField(
+                                    initialValue: snapshot.data,
+                                    onChanged: (string){
+                                      print(string);
+                                      blocSetting.setTempUserId(string);
+                                    },
+                                  );
+                                }else{
+                                  return Container();
+                                }
+                              },
+                            )
+                        )
+                      ],
+                    ),
+                  ),
+                  Container(
+                    height: 60,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        //SpaceBox(width: 20,),
                         Text("管理者権限"),
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
                         Container(
                           height: 60,
                           width: 60,
@@ -160,19 +186,24 @@ class _SettingScreenState extends State<SettingScreen> {
                 ],
               ),
             ),
-
             Divider(),
             ExpandablePanel(
-              header: Center(child: Text("警報設定")),
+              header: Center(
+                  child: Text(
+                    "警報設定",
+                    style: TextStyle(color: Colors.lightBlue),
+                  )
+              ),
               expanded: Column(
                 children: <Widget>[
                   Container(
                     height: 60,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
                         Text("侵入時警報"),
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
                         Container(
                           height: 60,
                           width: 60,
@@ -209,10 +240,11 @@ class _SettingScreenState extends State<SettingScreen> {
                   Container(
                     height: 60,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
                         Text("接近時警報"),
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
                         Container(
                           height: 60,
                           width: 60,
@@ -249,10 +281,11 @@ class _SettingScreenState extends State<SettingScreen> {
                   Container(
                     height: 60,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
                         Text("振動オン"),
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
                         Container(
                           height: 60,
                           width: 60,
@@ -289,10 +322,11 @@ class _SettingScreenState extends State<SettingScreen> {
                   Container(
                     height: 60,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
                         SpaceBox(width: 20,),
                         Text("接近判定距離"),
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
                         Container(
                           height: 60,
                           width: 120,
@@ -325,19 +359,24 @@ class _SettingScreenState extends State<SettingScreen> {
                 ],
               ),
             ),
-
             Divider(),
             ExpandablePanel(
-              header: Center(child: Text("履歴保存設定")),
+              header: Center(
+                  child: Text(
+                    "履歴保存設定",
+                    style: TextStyle(color: Colors.lightBlue),
+                  )
+              ),
               expanded: Column(
                 children: <Widget>[
                   Container(
                     height: 60,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
                         Text("移動履歴保存"),
-                        SpaceBox(width: 20,),
+                        //SpaceBox(width: 20,),
                         Container(
                           height: 60,
                           width: 60,
@@ -371,230 +410,240 @@ class _SettingScreenState extends State<SettingScreen> {
                       ],
                     ),
                   ),
+                  Divider(color: Colors.black),
                   Container(
-                    height: 60,
+                    height: 190,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        SpaceBox(width: 20,),
-                        Text("記録開始時刻"),
-                        SpaceBox(width: 20,),
-                        Container(
-                          height: 60,
-                          width: 120,
-                          child: Row(children: <Widget>[
-                            StreamBuilder(
-                              stream: blocSetting.onStartHour,
-                              builder: (context, snapshot){
-                                if(snapshot.hasData){
-                                  return NumberPicker.integer(
-                                      initialValue: snapshot.data+1,
-                                      minValue: 0,
-                                      maxValue: 23,
-                                      listViewWidth: 40,
-                                      highlightSelectedValue: false,
-                                      onChanged: (hour){
-                                        print("start hour :$hour");
-                                        blocSetting.setTempStartHour(hour - 1);
-                                      }
-                                  );
-                                }else{
-                                  return Container();
-                                }
-                              },
+                        Column(
+                          children: <Widget>[
+                            Text("記録開始時刻"),
+                            Container(
+                              height: 160,
+                              width: 120,
+                              child: Row(children: <Widget>[
+                                StreamBuilder(
+                                  stream: blocSetting.onStartHour,
+                                  builder: (context, snapshot){
+                                    if(snapshot.hasData){
+                                      return NumberPicker.integer(
+                                          initialValue: snapshot.data+1,
+                                          minValue: 0,
+                                          maxValue: 23,
+                                          listViewWidth: 40,
+                                          highlightSelectedValue: true,
+                                          onChanged: (hour){
+                                            blocSetting.startHour.add(hour-1);
+                                            print("start hour :$hour");
+                                            blocSetting.setTempStartHour(hour - 1);
+                                          }
+                                      );
+                                    }else{
+                                      return Container();
+                                    }
+                                  },
+                                ),
+                                Text(":"),
+                                StreamBuilder(
+                                  stream: blocSetting.onStartMinute,
+                                  builder: (context, snapshot){
+                                    if(snapshot.hasData){
+                                      return NumberPicker.integer(
+                                          initialValue: snapshot.data+1,
+                                          minValue: 0,
+                                          maxValue: 59,
+                                          listViewWidth: 40,
+                                          zeroPad: true,
+                                          highlightSelectedValue: true,
+                                          onChanged: (minute){
+                                            blocSetting.startMinute.add(minute - 1);
+                                            blocSetting.setTempStartMinute(minute - 1);
+                                          }
+                                      );
+                                    }else{
+                                      return Container();
+                                    }
+                                  },
+                                ),
+                              ],),
                             ),
-                            Text(":"),
-                            StreamBuilder(
-                              stream: blocSetting.onStartMinute,
-                              builder: (context, snapshot){
-                                if(snapshot.hasData){
-                                  return NumberPicker.integer(
-                                      initialValue: snapshot.data+1,
-                                      minValue: 0,
-                                      maxValue: 59,
-                                      listViewWidth: 40,
-                                      highlightSelectedValue: false,
-                                      onChanged: (minute){
-                                        blocSetting.setTempStartMinute(minute - 1);
-                                      }
-                                  );
-                                }else{
-                                  return Container();
-                                }
-                              },
+                          ],
+                        ),
+                        Center(child: Text("~"),),
+                        Column(
+                          children: <Widget>[
+                            Text("昼休み開始時刻"),
+                            Container(
+                              height: 160,
+                              width: 120,
+                              child: Row(children: <Widget>[
+
+                                StreamBuilder(
+                                  stream: blocSetting.onStartLunchHour,
+                                  builder: (context, snapshot){
+                                    if(snapshot.hasData){
+                                      return NumberPicker.integer(
+                                          initialValue: snapshot.data+1,
+                                          minValue: 0,
+                                          maxValue: 23,
+                                          listViewWidth: 40,
+                                          highlightSelectedValue: true,
+                                          onChanged: (hour){
+                                            blocSetting.startLunchHour.add(hour - 1);
+                                            blocSetting.setTempStartLunchHour(hour - 1);
+                                          }
+                                      );
+                                    }else{
+                                      return Container();
+                                    }
+
+                                  },
+                                ),
+                                Text(":"),
+                                StreamBuilder(
+                                  stream: blocSetting.onStartLunchMinute,
+                                  builder: (context, snapshot){
+                                    if(snapshot.hasData){
+                                      return NumberPicker.integer(
+                                          initialValue: snapshot.data+1,
+                                          minValue: 0,
+                                          maxValue: 59,
+                                          listViewWidth: 40,
+                                          zeroPad: true,
+                                          highlightSelectedValue: true,
+                                          onChanged: (minute){
+                                            blocSetting.startLunchMinute.add(minute - 1);
+                                            blocSetting.setTempStartLunchMinute(minute - 1);
+                                          }
+                                      );
+                                    }else{
+                                      return Container();
+                                    }
+                                  },
+                                ),
+                              ],),
                             ),
-                          ],),
+                          ],
                         )
                       ],
                     ),
                   ),
+                  Divider(color: Colors.black),
                   Container(
-                    height: 60,
+                    height: 190,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        SpaceBox(width: 20,),
-                        Text("記録終了時刻"),
-                        SpaceBox(width: 20,),
-                        Container(
-                          height: 60,
-                          width: 120,
-                          child: Row(children: <Widget>[
+                        Column(
+                          children: <Widget>[
+                            Text("昼休み終了時刻"),
+                            Container(
+                              height: 160,
+                              width: 120,
+                              child: Row(children: <Widget>[
 
-                            StreamBuilder(
-                              stream: blocSetting.onEndHour,
-                              builder: (context, snapshot){
-                                if(snapshot.hasData){
-                                  return NumberPicker.integer(
-                                      initialValue: snapshot.data+1,
-                                      minValue: 0,
-                                      maxValue: 23,
-                                      listViewWidth: 40,
-                                      highlightSelectedValue: false,
-                                      onChanged: (hour){
-                                        blocSetting.setTempEndHour(hour - 1);
-                                      }
-                                  );
-                                }else{
-                                  return Container();
-                                }
-                              },
+                                StreamBuilder(
+                                  stream: blocSetting.onEndLunchHour,
+                                  builder: (context, snapshot){
+                                    if(snapshot.hasData){
+                                      return NumberPicker.integer(
+                                          initialValue: snapshot.data+1,
+                                          minValue: 0,
+                                          maxValue: 23,
+                                          listViewWidth: 40,
+                                          highlightSelectedValue: true,
+                                          onChanged: (hour){
+                                            blocSetting.endLunchHour.add(hour - 1);
+                                            blocSetting.setTempEndLunchHour(hour - 1);
+                                          }
+                                      );
+                                    }else{
+                                      return Container();
+                                    }
+
+                                  },
+                                ),
+                                Text(":"),
+                                StreamBuilder(
+                                  stream: blocSetting.onEndLunchMinute,
+                                  builder: (context, snapshot){
+                                    if(snapshot.hasData){
+                                      return NumberPicker.integer(
+                                          initialValue: snapshot.data+1,
+                                          minValue: 0,
+                                          maxValue: 59,
+                                          listViewWidth: 40,
+                                          zeroPad: true,
+                                          highlightSelectedValue: true,
+                                          onChanged: (minute){
+                                            blocSetting.endLunchMinute.add(minute - 1);
+                                            blocSetting.setTempEndLunchMinute(minute - 1);
+                                          }
+                                      );
+                                    }else{
+                                      return Container();
+                                    }
+                                  },
+                                ),
+                              ],),
+                            )
+                          ],
+                        ),
+                        Center(child: Text("~"),),
+                        Column(
+                          children: <Widget>[
+                            Text("記録終了時刻"),
+                            Container(
+                              height: 160,
+                              width: 120,
+                              child: Row(children: <Widget>[
+
+                                StreamBuilder(
+                                  stream: blocSetting.onEndHour,
+                                  builder: (context, snapshot){
+                                    if(snapshot.hasData){
+                                      return NumberPicker.integer(
+                                          initialValue: snapshot.data+1,
+                                          minValue: 0,
+                                          maxValue: 23,
+                                          listViewWidth: 40,
+                                          highlightSelectedValue: true,
+                                          onChanged: (hour){
+                                            blocSetting.endHour.add(hour - 1);
+                                            blocSetting.setTempEndHour(hour - 1);
+                                          }
+                                      );
+                                    }else{
+                                      return Container();
+                                    }
+                                  },
+                                ),
+                                Text(":"),
+                                StreamBuilder(
+                                  stream: blocSetting.onEndMinute,
+                                  builder: (context, snapshot){
+                                    if(snapshot.hasData){
+                                      return NumberPicker.integer(
+                                          initialValue: snapshot.data+1,
+                                          minValue: 0,
+                                          maxValue: 59,
+                                          listViewWidth: 40,
+                                          zeroPad: true,
+                                          highlightSelectedValue: true,
+                                          onChanged: (minute){
+                                            blocSetting.endMinute.add(minute - 1);
+                                            blocSetting.setTempEndMinute(minute - 1);
+                                          }
+                                      );
+                                    }else{
+                                      return Container();
+                                    }
+                                  },
+                                ),
+                              ],),
                             ),
-                            Text(":"),
-                            StreamBuilder(
-                              stream: blocSetting.onEndMinute,
-                              builder: (context, snapshot){
-                                if(snapshot.hasData){
-                                  return NumberPicker.integer(
-                                      initialValue: snapshot.data+1,
-                                      minValue: 0,
-                                      maxValue: 59,
-                                      listViewWidth: 40,
-                                      highlightSelectedValue: false,
-                                      onChanged: (minute){
-                                        blocSetting.setTempEndMinute(minute - 1);
-                                      }
-                                  );
-                                }else{
-                                  return Container();
-                                }
-
-                              },
-                            ),
-
-                          ],),
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                    height: 60,
-                    child: Row(
-                      children: <Widget>[
-                        SpaceBox(width: 20,),
-                        Text("昼休み開始時刻"),
-                        SpaceBox(width: 20,),
-                        Container(
-                          height: 60,
-                          width: 120,
-                          child: Row(children: <Widget>[
-
-                            StreamBuilder(
-                              stream: blocSetting.onStartLunchHour,
-                              builder: (context, snapshot){
-                                if(snapshot.hasData){
-                                  return NumberPicker.integer(
-                                      initialValue: snapshot.data+1,
-                                      minValue: 0,
-                                      maxValue: 23,
-                                      listViewWidth: 40,
-                                      highlightSelectedValue: false,
-                                      onChanged: (hour){
-                                        blocSetting.setTempStartLunchHour(hour - 1);
-                                      }
-                                  );
-                                }else{
-                                  return Container();
-                                }
-
-                              },
-                            ),
-                            Text(":"),
-                            StreamBuilder(
-                              stream: blocSetting.onStartLunchMinute,
-                              builder: (context, snapshot){
-                                if(snapshot.hasData){
-                                  return NumberPicker.integer(
-                                      initialValue: snapshot.data+1,
-                                      minValue: 0,
-                                      maxValue: 59,
-                                      listViewWidth: 40,
-                                      highlightSelectedValue: false,
-                                      onChanged: (minute){
-                                        blocSetting.setTempStartLunchMinute(minute - 1);
-                                      }
-                                  );
-                                }else{
-                                  return Container();
-                                }
-                              },
-                            ),
-                          ],),
-                        )
-                      ],
-                    ),
-                  ),
-                  Container(
-                    height: 60,
-                    child: Row(
-                      children: <Widget>[
-                        SpaceBox(width: 20,),
-                        Text("昼休み終了時刻"),
-                        SpaceBox(width: 20,),
-                        Container(
-                          height: 60,
-                          width: 120,
-                          child: Row(children: <Widget>[
-
-                            StreamBuilder(
-                              stream: blocSetting.onEndLunchHour,
-                              builder: (context, snapshot){
-                                if(snapshot.hasData){
-                                  return NumberPicker.integer(
-                                      initialValue: snapshot.data+1,
-                                      minValue: 0,
-                                      maxValue: 23,
-                                      listViewWidth: 40,
-                                      highlightSelectedValue: false,
-                                      onChanged: (hour){
-                                        blocSetting.setTempEndLunchHour(hour - 1);
-                                      }
-                                  );
-                                }else{
-                                  return Container();
-                                }
-
-                              },
-                            ),
-                            Text(":"),
-                            StreamBuilder(
-                              stream: blocSetting.onEndLunchMinute,
-                              builder: (context, snapshot){
-                                if(snapshot.hasData){
-                                  return NumberPicker.integer(
-                                      initialValue: snapshot.data+1,
-                                      minValue: 0,
-                                      maxValue: 59,
-                                      listViewWidth: 40,
-                                      highlightSelectedValue: false,
-                                      onChanged: (minute){
-                                        blocSetting.setTempEndLunchMinute(minute - 1);
-                                      }
-                                  );
-                                }else{
-                                  return Container();
-                                }
-                              },
-                            ),
-                          ],),
+                          ],
                         )
                       ],
                     ),

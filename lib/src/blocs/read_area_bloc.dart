@@ -10,6 +10,15 @@ class ReadAreaBloc extends Bloc{
 
   void updateAreaList(){
     AreaRepository().getTableList().then((list){
+
+      if(list.contains("android_metadata")){
+        list.remove("android_metadata");
+      }
+
+      if(list.contains("sqlite_sequence")){
+        list.remove("sqlite_sequence");
+      }
+
       areaList.add(list);
       print("area name list updated");
     });

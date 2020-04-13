@@ -40,7 +40,7 @@ class App extends StatelessWidget {
               ),
           '/ble-central-screen': (BuildContext context) =>
               BlocProvider<BleCentralBloc>(
-                creator: (context, _bag) => BleCentralBloc(),
+                creator: (context, _bag) => BleCentralBloc(context),
                 child: BleCentralScreen(),
               ),
           '/setting-screen':(BuildContext context) =>

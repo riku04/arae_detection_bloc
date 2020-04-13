@@ -12,12 +12,14 @@ import 'package:flutter_map_app/src/repository/area_repository.dart';
 import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:flutter_map_app/src/utilities/helper.dart';
+import 'package:location_permissions/location_permissions.dart';
 
 class BleCentralBloc extends Bloc {
   FlutterBlue _flutterBlue;
   List<BluetoothDevice> devices;
   bool isScanning = false;
   BluetoothDevice connectedDevice;
+  BuildContext context;
 
   final _scanResultController = StreamController<List<BluetoothDevice>>();
   Sink<List<BluetoothDevice>> get deviceList => _scanResultController.sink;
@@ -41,16 +43,47 @@ class BleCentralBloc extends Bloc {
     deviceList.add(devices);
   }
 
-  void scan() {
+  void scan() async{
+
+    ServiceStatus serviceStatus = await LocationPermissions().checkServiceStatus();
+    if(serviceStatus == ServiceStatus.disabled){
+      print("location service:disabled");
+
+      //ダイアログで位置情報をONにするように表示
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("位置情報が無効になっています"),
+              content: Text("位置情報を有効化してやり直してください"),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("OK"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+
+
+      return;
+    }
+
+
     _flutterBlue
         .scan(
             scanMode: ScanMode.lowLatency,
             timeout: Duration(seconds: Constants.SCAN_TIMEOUT))
         .listen((result) {
-      //print(result.device.name);
-      //if ((result.device.name != "") && (!devices.contains(result.device))) {
 
-      if ((!devices.contains(result.device))) {
+          print("*************************");
+          print(result.device.name);
+
+      if ((result.device.name != "") && (!devices.contains(result.device))) {
+
+//      if ((!devices.contains(result.device))) {
 
         devices.add(result.device);
         print(result.device.name);
@@ -65,6 +98,7 @@ class BleCentralBloc extends Bloc {
       print("scan error");
       return;
     }, cancelOnError: true);
+    return;
   }
 
   void connect(BluetoothDevice device,String userId, String groupId) {
@@ -204,7 +238,8 @@ class BleCentralBloc extends Bloc {
     return;
   }
 
-  BleCentralBloc() {
+  BleCentralBloc(BuildContext context) {
+    this.context = context;
     devices = new List();
     updateDeviceList();
 

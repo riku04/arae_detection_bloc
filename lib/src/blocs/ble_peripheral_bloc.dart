@@ -61,7 +61,6 @@ class BlePeripheralBloc extends Bloc {
     //await flutterBlePeripheral.init(serviceUuid, characteristicUuid); //バグってるので非推奨、defaultの値で固定。
 
     flutterBlePeripheral.onReceived().listen((bytes) {
-
       if(isAdvertising){
         stopAdvertise();
       }
@@ -156,14 +155,22 @@ class BlePeripheralBloc extends Bloc {
   }
 
   Future<void> startAdvertise(String localName)async{
-   await flutterBlePeripheral.startAdvertising(localName);
-   isAdvertising = true;
-   status.add("advertising...");
-   return;
+    print("advertise name:[$localName]");
+    flutterBlePeripheral.startAdvertising(localName);           //一度開始してから止めて再開しないとlocalNameが反映されない（？？？？？？？）
+    Future.delayed(Duration(milliseconds: 100)).then((_)async{
+      flutterBlePeripheral.stopAdvertising();
+      Future.delayed(Duration(milliseconds: 100)).then((_)async{
+        flutterBlePeripheral.startAdvertising(localName);
+      });
+    });
+
+    isAdvertising = true;
+    status.add("advertising...");
+    return;
   }
 
   Future<void> stopAdvertise()async{
-    await flutterBlePeripheral.stopAdvertising();
+    flutterBlePeripheral.stopAdvertising();
     isAdvertising = false;
     status.add("");
     return;

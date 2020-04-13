@@ -34,7 +34,7 @@ class _BleCentralScreenState extends State<BleCentralScreen> {
             },
             child: Scaffold(
               appBar: AppBar(
-                title: Text("SCAN DEVICES"),
+                title: Text("子機の設定"),
                 bottom: PreferredSize(
                   child: StreamBuilder(
                     stream: bleCentralBloc.onStatus,

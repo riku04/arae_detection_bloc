@@ -25,7 +25,7 @@ class _ReadAreaScreenState extends State<ReadAreaScreen> {
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
-        title: Text("READ AREA"),
+        title: Text("領域読み込み"),
       ),
       body: StreamBuilder<List<String>>(
         stream: readAreaBloc.onAreaList,

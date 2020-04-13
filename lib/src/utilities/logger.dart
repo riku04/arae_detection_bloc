@@ -88,6 +88,7 @@ class Logger{
     line += "${point.latitude},";
     line += "${point.longitude},";
     line += "$status";
+    print(line);
 
     if(!exists){
       print("[$path] doesn't exist, initializing...");

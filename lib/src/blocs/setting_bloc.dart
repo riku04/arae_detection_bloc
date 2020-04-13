@@ -1,5 +1,6 @@
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
@@ -12,11 +13,37 @@ class SettingBloc extends Bloc{
   Map<String,dynamic> _settings; //DBから読み出したパラメータ
   UserSettings _tempUserSettings; //変更後のパラメータ
 
+  final _saveActivatedController = StreamController<bool>();
+  Sink<bool> get saveActivated => _saveActivatedController.sink;
+  Stream<bool> get onSaveActivated => _saveActivatedController.stream;
+
+  bool isTimeSettingValid(){
+    DateTime start = DateTime(2020,1,1,_tempUserSettings.startHour,_tempUserSettings.startMinute);
+    DateTime lunchStart = DateTime(2020,1,1,_tempUserSettings.startLunchHour,_tempUserSettings.startLunchMinute);
+    DateTime lunchEnd = DateTime(2020,1,1,_tempUserSettings.endLunchHour,_tempUserSettings.endLunchMinute);
+    DateTime end = DateTime(2020,1,1,_tempUserSettings.endHour,_tempUserSettings.endMinute);
+    if(start.isBefore(lunchStart)&&lunchStart.isBefore(lunchEnd)&&lunchEnd.isBefore(end)){
+      return true;
+    }else{
+      return false;
+    }
+  }
+
   void setTempUserId(String userId){
-    _tempUserSettings.userId = userId;
+    if(userId != ""){
+      _tempUserSettings.userId = userId;
+      saveActivated.add(true);
+    }else{
+      saveActivated.add(false);
+    }
   }
   void setTempGroupId(String groupId){
-    _tempUserSettings.groupId = groupId;
+    if(groupId != "") {
+      _tempUserSettings.groupId = groupId;
+      saveActivated.add(true);
+    }else{
+      saveActivated.add(false);
+    }
   }
   void setTempAdmin(int hasAdmin){
     _tempUserSettings.admin = hasAdmin;
@@ -38,27 +65,67 @@ class SettingBloc extends Bloc{
   }
   void setTempStartHour(int startHour){
     _tempUserSettings.startHour = startHour;
+    if(isTimeSettingValid()){
+      saveActivated.add(true);
+    }else{
+      saveActivated.add(false);
+    }
   }
   void setTempStartMinute(int startMinute){
     _tempUserSettings.startMinute = startMinute;
+    if(isTimeSettingValid()){
+      saveActivated.add(true);
+    }else{
+      saveActivated.add(false);
+    }
   }
   void setTempEndHour(int endHour){
     _tempUserSettings.endHour = endHour;
+    if(isTimeSettingValid()){
+      saveActivated.add(true);
+    }else{
+      saveActivated.add(false);
+    }
   }
   void setTempEndMinute(int endMinute){
     _tempUserSettings.endMinute = endMinute;
+    if(isTimeSettingValid()){
+      saveActivated.add(true);
+    }else{
+      saveActivated.add(false);
+    }
   }
   void setTempStartLunchHour(int startLunchHour){
     _tempUserSettings.startLunchHour = startLunchHour;
+    if(isTimeSettingValid()){
+      saveActivated.add(true);
+    }else{
+      saveActivated.add(false);
+    }
   }
   void setTempStartLunchMinute(int startLunchMinute){
     _tempUserSettings.startLunchMinute = startLunchMinute;
+    if(isTimeSettingValid()){
+      saveActivated.add(true);
+    }else{
+      saveActivated.add(false);
+    }
   }
   void setTempEndLunchHour(int endLunchHour){
     _tempUserSettings.endLunchHour = endLunchHour;
+    if(isTimeSettingValid()){
+      saveActivated.add(true);
+    }else{
+      saveActivated.add(false);
+    }
   }
   void setTempEndLunchMinute(int endLunchMinute){
     _tempUserSettings.endLunchMinute = endLunchMinute;
+    if(isTimeSettingValid()){
+      saveActivated.add(true);
+    }else{
+      saveActivated.add(false);
+    }
   }
   void setTempCloseDistanceMeter(int closeDistanceMeter){
     _tempUserSettings.closeDistanceMeter = closeDistanceMeter;
@@ -255,6 +322,7 @@ class SettingBloc extends Bloc{
     this._repository = repository;
     _tempUserSettings = UserSettings();
     readCurrentSettings();
+    saveActivated.add(true);
   }
 
   @override
@@ -284,5 +352,6 @@ class SettingBloc extends Bloc{
     _enterLogIntervalSecController.close();
     _beaconLogIntervalSecController.close();
     _beaconNameListStringController.close();
+    _saveActivatedController.close();
   }
 }

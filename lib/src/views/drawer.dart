@@ -24,15 +24,31 @@ class _MainDrawerState extends State<MainDrawer> {
   @override
   build(BuildContext context) {
     final blocMap = BlocProvider.of<MapBloc>(context);
-
     return Drawer(
       child: Column(
         children: <Widget>[
           Container(
-            height: 66,
+            color: Colors.lightBlue,
+            height: 80,
+            width: double.infinity,
             child: DrawerHeader(
-              child: Column(
-                children: <Widget>[Text("Group:"), Text("User:")],
+              child:Column(
+                children: <Widget>[
+                  Text(
+                    "group: ${blocMap.groupIdString}",
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white
+                    ),
+                  ),
+                  Text(
+                    "user: ${blocMap.userIdString}",
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -41,14 +57,14 @@ class _MainDrawerState extends State<MainDrawer> {
               SpaceBox(width: 16),
               Icon(Icons.save),
               SpaceBox(width: 64),
-              Text("SAVE AREA")
+              Text("領域保存")
             ]),
             onPressed: () {
               showDialog(
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: Text("input area name"),
+                      title: Text("名前を入力して保存"),
                       content: TextField(
                         controller: _textFieldController,
                       ),
@@ -82,7 +98,7 @@ class _MainDrawerState extends State<MainDrawer> {
               SpaceBox(width: 16),
               Icon(Icons.open_in_new),
               SpaceBox(width: 64),
-              Text("READ AREA")
+              Text("領域読み込み")
             ]),
             onPressed: () {
               Navigator.of(context).pop();
@@ -94,14 +110,14 @@ class _MainDrawerState extends State<MainDrawer> {
               SpaceBox(width: 16),
               Icon(Icons.delete),
               SpaceBox(width: 64),
-              Text("REMOVE ALL AREAS")
+              Text("地図上の全領域を削除")
             ]),
             onPressed: () {
               showDialog(
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: Text("remove all areas?"),
+                      title: Text("現在の領域を全削除します"),
                       actions: <Widget>[
                         FlatButton(
                           child: Text("Cancel"),
@@ -123,12 +139,13 @@ class _MainDrawerState extends State<MainDrawer> {
                   });
             },
           ),
+          Divider(),
           FlatButton(
             child: Row(children: [
               SpaceBox(width: 16),
               Icon(Icons.bluetooth_searching),
               SpaceBox(width: 64),
-              Text("SCAN DEVICES")
+              Text("子機の設定")
             ]),
             onPressed: () {
               Navigator.of(context).pop();
@@ -140,7 +157,7 @@ class _MainDrawerState extends State<MainDrawer> {
               SpaceBox(width: 16),
               Icon(Icons.bluetooth_searching),
               SpaceBox(width: 64),
-              Text("RECEIVE SETTINGS")
+              Text("親機から設定を受信")
             ]),
             onPressed: () {
               Navigator.of(context).pop();
@@ -148,24 +165,26 @@ class _MainDrawerState extends State<MainDrawer> {
 //              Navigator.pushNamed(context, '/ble-peripheral-screen');
             },
           ),
+          Divider(),
           FlatButton(
             child: Row(children: [
               SpaceBox(width: 16),
               Icon(Icons.history),
               SpaceBox(width: 64),
-              Text("READ LOG DATA")
+              Text("移動履歴確認")
             ]),
             onPressed: () {
               Navigator.of(context).pop();
               Navigator.pushNamed(context, '/read-log-screen');
             },
           ),
+          Divider(),
           FlatButton(
             child: Row(children: [
               SpaceBox(width: 16),
               Icon(Icons.settings),
               SpaceBox(width: 64),
-              Text("SETTING")
+              Text("設定")
             ]),
             onPressed: () {
               Navigator.of(context).pop();

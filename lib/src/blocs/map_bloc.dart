@@ -4,6 +4,7 @@ import 'package:async/async.dart';
 import 'package:bloc_provider/bloc_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_background_location/flutter_background_location.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/models/area.dart';
@@ -14,9 +15,11 @@ import 'package:flutter_map_app/src/repository/user_settings_repository.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
 import 'package:flutter_map_app/src/utilities/helper.dart';
 import 'package:flutter_map_app/src/utilities/logger.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 //import 'package:fluttertoast/fluttertoast.dart';
 import 'package:latlong/latlong.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:soundpool/soundpool.dart';
 import 'package:vibration/vibration.dart';
 import 'dart:math' as math;
 
@@ -36,6 +39,7 @@ class MapBloc extends Bloc {
   List<Polygon> _expandedPolygons; //接近領域
   List<Polygon> _moreExpandedPolygons; //準接近領域
 
+  List<int> _logStatusNum;
   List<Marker> _logMarkers; //履歴ファイルを読み出して再生するときに使うマーカー
   List<Polyline> _logLines; //ポリライン
   List<Polygon> _logPolygons; //履歴ファイルから読み出した領域データ
@@ -56,10 +60,30 @@ class MapBloc extends Bloc {
   PolygonLayerOptions _logPolygonLayer;
   PolygonLayerOptions _logExpandedPolygonLayer;
 
+  double _closeDistance = 10;
+
   bool isPolygonReady = false;
   int _logPlaySpeed = 1;
 
   LatLng lastPoint;
+
+  String groupIdString = "";
+  String userIdString = "";
+
+  bool isAlertEnable = false;
+  Soundpool soundpool;
+  int closeAlertId;
+  int enterAlertId;
+  bool hasCloseAlert = false;
+  bool hasEnterAlert = false;
+
+  bool isCalcLocationEnable = false;
+
+  MapController _mapController;
+
+  void setMapController(MapController mc){
+    this._mapController = mc;
+  }
 
   final StreamController<MapOptions> _optionsController =
       StreamController<MapOptions>();
@@ -78,7 +102,7 @@ class MapBloc extends Bloc {
   Sink<LatLng> get addCurrentLocation => _currentLocationController.sink;
   Stream<LatLng> get onCurrentLocationChanged => _currentLocationController.stream;
 
-  final _userSettingsController = StreamController<Map<String,dynamic>>();
+  final _userSettingsController = StreamController<Map<String,dynamic>>.broadcast();
   Sink<Map<String,dynamic>> get settings => _userSettingsController.sink;
   Stream<Map<String,dynamic>> get onSettingsChanged => _userSettingsController.stream;
 
@@ -106,6 +130,23 @@ class MapBloc extends Bloc {
   Sink<DateTime> get logTotalTime => _logTotalTimeController.sink;
   Stream<DateTime> get onLogTotalTime => _logTotalTimeController.stream;
 
+  final _alertEnableController = StreamController<bool>.broadcast();
+  Sink<bool> get alertEnable => _alertEnableController.sink;
+  Stream<bool> get onAlertEnableChanged => _alertEnableController.stream;
+
+  final _logStatusController = StreamController<int>.broadcast();
+  Sink<int> get logStatus => _logStatusController.sink;
+  Stream<int> get onLogStatusChanged => _logStatusController.stream;
+
+  final _calcLocationController = StreamController<bool>.broadcast();
+  Sink<bool> get calcLocation => _calcLocationController.sink;
+  Stream<bool> get onCalcLocationChanged => _calcLocationController.stream;
+
+  bool isLongPressed = false;
+
+  final _selectPolygonController = StreamController<Polygon>.broadcast();
+  Sink<Polygon> get selectPolygon => _selectPolygonController.sink;
+  Stream<Polygon> get onSelectPolygon => _selectPolygonController.stream;
 
   void initMapOptions() {
     MapOptions _mapOptions = new MapOptions(
@@ -113,7 +154,21 @@ class MapBloc extends Bloc {
         zoom: 13.0,
         onTap: (_latLng) {
           addCurrentLocation.add(_latLng);
-        });
+        },
+        onLongPress:(_latLng){
+          print("long pressed");
+          if(isLongPressed == false) {
+            isLongPressed = true;
+            _polygons.forEach((polygon) {
+              if (polygonContainsPoint(polygon, _latLng)) {
+                selectPolygon.add(polygon);
+                isLongPressed = false;
+                return;
+              }
+            });
+          }
+        }
+        );
     initOptions.add(_mapOptions);
   }
 
@@ -254,6 +309,7 @@ class MapBloc extends Bloc {
         _polygons.add(polygon);
       });
       setLayers.add(layers);
+      _mapController.move(_polygons[_polygons.length-1].points[0], _mapController.zoom);
     });
   }
 
@@ -285,6 +341,75 @@ class MapBloc extends Bloc {
     }
 
     return (depth & 1) == 1;
+  }
+
+  bool polygonCloserPoint(Polygon polygon, LatLng point, double distance){
+    bool closer = false;
+
+    double rad = 0;
+    const double addition = 0.1;
+
+    while(rad<=2){
+
+      LatLng rotated = LatLng(point.latitude,point.longitude);
+      double r = 0.0;
+
+      while(calcDistance(point, rotated)<=distance){
+        double lat = point.latitude + r * math.sin(rad * math.pi);
+        double lon = point.longitude + r * math.cos(rad * math.pi);
+        rotated = LatLng(lat,lon);
+        r+=0.000001;
+      }
+
+//      Marker marker = Marker(
+//          point: rotated,
+//          anchorPos: AnchorPos.align(AnchorAlign.center),
+//          builder: (ctx) {
+//            return Icon(
+//              Icons.fiber_manual_record,
+//              color: Colors.lightBlueAccent,
+//              size: 10,
+//            );
+//          }
+//      );
+//      _markers.add(marker);
+//      setLayers.add(layers);
+
+//      print(calcDistance(point, rotated));
+//      print(rotated);
+
+      if(polygonContainsPoint(polygon, rotated)){
+        closer = true;
+        break;
+      }
+
+      rad += addition;
+    }
+    //print("close?:$closer");
+    return closer;
+  }
+
+  double calcDistance(LatLng p1, LatLng p2){
+    final double GRS80_A = 6378137.000;//長半径 a(m)
+    final double GRS80_E2 = 0.00669438002301188;//第一遠心率  eの2乗
+    double lon1 = p1.longitude;
+    double lat1 = p1.latitude;
+    double lon2 = p2.longitude;
+    double lat2 = p2.latitude;
+    double my = degToRadian((lat1 + lat2) / 2.0); //緯度の平均値
+    double dy = degToRadian(lat1 - lat2); //緯度の差
+    double dx = degToRadian(lon1 - lon2); //経度の差
+    //卯酉線曲率半径を求める(東と西を結ぶ線の半径)
+    double sinMy = math.sin(my);
+    double w = math.sqrt(1.0 - GRS80_E2 * sinMy * sinMy);
+    double n = GRS80_A / w;
+    //子午線曲線半径を求める(北と南を結ぶ線の半径)
+    double mnum = GRS80_A * (1 - GRS80_E2);
+    double m = mnum / (w * w * w);
+    //ヒュベニの公式
+    double dym = dy * m;
+    double dxncos = dx * n * math.cos(my);
+    return math.sqrt(dym * dym + dxncos * dxncos);
   }
 
   //when userSettings or polygons changed call this to refresh the logger
@@ -324,16 +449,20 @@ class MapBloc extends Bloc {
     int cnt = 0;
     Future.doWhile((){
 
+      //outside 0, close 1, inside 2
       Color color;
       switch(logData.datePoints[cnt].getStatus()){
         case 0:
-          color = Colors.indigo;
+          _logStatusNum.add(0);
+          color = Colors.lightBlue;
           break;
         case 1:
-          color = Colors.red;
+          _logStatusNum.add(1);
+          color = Colors.orange;
           break;
         case 2:
-          color = Colors.yellowAccent;
+          _logStatusNum.add(2);
+          color = Colors.pink;
           break;
         case 3:
           color = Colors.green;
@@ -377,11 +506,14 @@ class MapBloc extends Bloc {
     print("log points:${_tempLogMarkers.length}");
     progressPeriod = 1.0 / _tempLogMarkers.length;
 
-    logCurrentTime.add(_tempDateTime[0]);
-    logTotalTime.add(_tempDateTime[_tempDateTime.length-1]);
-    logPlayerProgress.add(0.0);
+    await Future.delayed((Duration(milliseconds: 100)),(){
+      logCurrentTime.add(_tempDateTime[0]);
+      logTotalTime.add(_tempDateTime[_tempDateTime.length-1]);
+    });
 
-  return;
+    logPlayerProgress.add(0.0);
+    this._mapController.move(_tempLogMarkers[0].point, this._mapController.zoom);
+    return;
   }
 
   void showLogPlayer(){
@@ -406,6 +538,7 @@ class MapBloc extends Bloc {
             }
             if (_logMarkers.length == 0) {
               _logMarkers.add(_tempLogMarkers[_logMarkers.length]);
+              logStatus.add(_logStatusNum[_logMarkers.length]);
               setLayers.add(layers);
               return true;
             }
@@ -419,6 +552,7 @@ class MapBloc extends Bloc {
             await Future.delayed(Duration(milliseconds: delayInt));
 
             _logMarkers.add(_tempLogMarkers[_logMarkers.length]);
+            logStatus.add(_logStatusNum[_logMarkers.length]);
             setLayers.add(layers);
 
             int totalTime = _tempDateTime[_tempDateTime.length - 1]
@@ -450,6 +584,7 @@ class MapBloc extends Bloc {
 
             await Future.delayed(Duration(milliseconds: delayInt));
             _logMarkers.removeLast();
+            logStatus.add(_logStatusNum[_logMarkers.length]);
             setLayers.add(layers);
 
             int totalTime = _tempDateTime[_tempDateTime.length - 1]
@@ -549,6 +684,7 @@ class MapBloc extends Bloc {
     _draftMarkers = List();
     _markers = List();
     _lines = List();
+    _logStatusNum = List();
     _logMarkers = List();
     _logLines = List();
     _draftPolygons = List();
@@ -560,16 +696,61 @@ class MapBloc extends Bloc {
 
     _logger = Logger();
     setLogger();
+
+
+    UserSettingsRepository().getTableData().then((settings)async{
+      this.userIdString = settings["USER_ID"];
+      this.groupIdString = settings["GROUP_ID"];
+      if(settings["CLOSE_ALERT_ON"]==1){
+        this.hasCloseAlert = true;
+      }
+      if(settings["ENTER_ALERT_ON"]==1){
+        this.hasEnterAlert = true;
+      }
+
+      if(soundpool==null) {
+        soundpool = Soundpool(streamType: StreamType.music);
+        closeAlertId = await rootBundle.load("sounds/pupu.mp3").then((ByteData soundData) {
+          return soundpool.load(soundData);
+        });
+        enterAlertId = await rootBundle.load("sounds/pii.mp3").then((ByteData soundData) {
+          return soundpool.load(soundData);
+        });
+      }
+
+      _closeDistance = settings["CLOSE_DISTANCE_METER"] * 1.0;
+
+    });
+
     onSettingsChanged.listen((settings) {
       print("settings changed");
       setLogger();
+      this.userIdString = settings["USER_ID"];
+      this.groupIdString = settings["GROUP_ID"];
+      if(settings["CLOSE_ALERT_ON"]==1){
+        this.hasCloseAlert = true;
+      }
+      if(settings["ENTER_ALERT_ON"]==1){
+        this.hasEnterAlert = true;
+      }
+      _closeDistance = settings["CLOSE_DISTANCE_METER"] * 1.0;
+
       //Fluttertoast.showToast(msg: "保存しました");
     });
 
+    LatLng oldPoint = LatLng(0,0);//geoLocationUpdatesで同じ座標が複数回連続で呼ばれる問題対策
     FlutterBackgroundLocation.startLocationService();
     FlutterBackgroundLocation.getLocationUpdates((point){
       print("point: ${point.latitude},${point.longitude}");
+
+      if(oldPoint.latitude==point.latitude
+      &&oldPoint.longitude==point.longitude){
+        return;
+      }
       addCurrentLocation.add(LatLng(point.latitude,point.longitude));
+      oldPoint.latitude = point.latitude;
+      oldPoint.longitude = point.longitude;
+
     });
 
     onAddPoint.listen((point) {
@@ -603,46 +784,105 @@ class MapBloc extends Bloc {
       }
     });
 
+    //outside 0, close 1, inside 2
     onCurrentLocationChanged.listen((point) async {
+
+//      if(isCalcLocationEnable) {
+//        _mapController.move(point, _mapController.zoom);
+//      }
+
       lastPoint = point;
       int result = 0;
       _polygons.forEach((polygon) {
         if (polygonContainsPoint(polygon, point)) {
           print("inside");
+          result = 2;
+        }else if(polygonCloserPoint(polygon, point, _closeDistance)){
+          print("close");
           result = 1;
         } else {
           print("outside");
         }
       });
-      if (result==1) {
-        Vibration.hasVibrator().then((bool) {
-          if (bool) {
-            Vibration.vibrate();
+      if (result == Constants.INSIDE) {
+
+        if(this.isAlertEnable) {
+          Vibration.hasVibrator().then((bool) {
+            if (bool) {
+              Vibration.vibrate();
+            }
+          });
+
+          if (this.hasEnterAlert) {
+            //alert
+            await soundpool.play(enterAlertId);
+            print("enter alert here!");
           }
-        });
-        _markers.add(Marker(
-          point: point,
-          builder: (ctx) {
-            return Icon(
-              Icons.location_on,
-              color: Colors.yellowAccent,
-            );
-          },
-          anchorPos: AnchorPos.align(AnchorAlign.top),
-        ));
+        }
+
+        _markers.add(
+            Marker(
+              point: point,
+              anchorPos: AnchorPos.align(AnchorAlign.top),
+              builder: (ctx) {
+                return Icon(
+                  Icons.location_on,
+                  color: Colors.pink,
+                );
+                },
+            ));
         setLayers.add(layers);
-      } else {
-        _markers.add(Marker(
-            point: point,
-            builder: (ctx) {
-              return Icon(
-                Icons.location_on,
-                color: Colors.green,
-              );
-            }));
+
+      } else if(result == Constants.CLOSE) {
+
+        if(this.isAlertEnable) {
+          Vibration.hasVibrator().then((bool) {
+            if (bool) {
+              Vibration.vibrate();
+            }
+          });
+
+          if (this.hasCloseAlert) {
+            //alert
+            await soundpool.play(closeAlertId);
+            print("close alert here!");
+          }
+        }
+
+        _markers.add(
+            Marker(
+              point: point,
+              anchorPos: AnchorPos.align(AnchorAlign.top),
+              builder: (ctx) {
+                return Icon(
+                  Icons.location_on,
+                  color: Colors.orange,
+                );
+                },
+            ));
+        setLayers.add(layers);
+
+      }else if(result == Constants.OUTSIDE){
+        _markers.add(
+            Marker(
+                point: point,
+                builder: (ctx) {
+                  return Icon(
+                    Icons.location_on,
+                    color: Colors.lightBlue,
+                  );
+                }
+            ));
         setLayers.add(layers);
       }
+
+      if(_markers.length>=50){
+        _markers.removeAt(0);
+        setLayers.add(layers);
+      }
+
       await _logger.addLog(DateTime.now(), point, result);
+
     });
 
     logPlayerSpeed.add(1);
@@ -696,6 +936,7 @@ class MapBloc extends Bloc {
         }
       });
 
+      logStatus.add(_logStatusNum[_logMarkers.length]);
       logCurrentTime.add(_tempDateTime[_logMarkers.length-1]);
       setLayers.add(layers);
       print(progress);
@@ -718,8 +959,84 @@ class MapBloc extends Bloc {
       }
     });
 
+    onLogStatusChanged.listen((status)async{
+      if(status == Constants.INSIDE){
+        if(this.isAlertEnable) {
+          Vibration.hasVibrator().then((bool) {
+            if (bool) {
+              Vibration.vibrate();
+            }
+          });
+          if (this.hasCloseAlert) {
+            //alert
+            await soundpool.play(enterAlertId);
+            print("close alert here!");
+          }
+        }
+      }else if(status == Constants.CLOSE){
+        if(this.isAlertEnable) {
+          Vibration.hasVibrator().then((bool) {
+            if (bool) {
+              Vibration.vibrate();
+            }
+          });
+          if (this.hasCloseAlert) {
+            //alert
+            await soundpool.play(closeAlertId);
+            print("close alert here!");
+          }
+        }
+      }else if(status == Constants.OUTSIDE){
+
+      }
+    });
+
+    CancelableOperation calculator;
+    onCalcLocationChanged.listen((bool)async{
+      print("calculate location start");
+      isCalcLocationEnable = bool;
+      if(bool){
+        //wait 10 sec
+        if(calculator==null||calculator.isCanceled||calculator.isCompleted){
+          calculator = CancelableOperation.fromFuture(
+            Future.delayed(Duration(seconds: 10),(){
+              print("calculate location stop");
+              calcLocation.add(false);
+              isCalcLocationEnable = false;
+            })
+          );
+        }
+      }else{
+        print("calclating");
+      }
+    });
+
+    alertEnable.add(false);
+    onAlertEnableChanged.listen((bool){
+      this.isAlertEnable = bool;
+    });
 
   }
+
+  void removePolygon(polygon){
+    if(_polygons.contains(polygon)) {
+      _polygons.remove(polygon);
+      setLayers.add(layers);
+      removeAreaByAreaName(Constants.DEFAULT_AREA_TABLE).then((_){
+        saveCurrentArea(Constants.DEFAULT_AREA_TABLE);
+      });
+      setLogger();
+    }
+  }
+
+  void showPolygonDialog(){
+
+  }
+
+  void toggleAlertEnable(){
+      alertEnable.add(!isAlertEnable);
+  }
+
   @override
   void dispose() {
     _optionsController.close();
@@ -732,5 +1049,9 @@ class MapBloc extends Bloc {
     _logPlayerProgressController.close();
     _logCurrentTimeController.close();
     _logTotalTimeController.close();
+    _alertEnableController.close();
+    _logStatusController.close();
+    _calcLocationController.close();
+    _selectPolygonController.close();
   }
 }
