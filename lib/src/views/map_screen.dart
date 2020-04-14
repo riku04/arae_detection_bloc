@@ -54,14 +54,14 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
             keyTarget: keyAddPinButton,
             contents: [
               ContentTarget(
-                  align: AlignContent.bottom,
+                  align: AlignContent.top,
                   child: Container(
                     child:Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          "Titulo lorem ipsum",
+                          "領域ピン立てボタン",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -70,7 +70,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
-                          child: Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
+                          child: Text("禁止領域の頂点を追加します。頂点数が3つ以上になると確定が可能になります。",
                             style: TextStyle(
                                 color: Colors.white
                             ),),
@@ -95,7 +95,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          "Titulo lorem ipsum",
+                          "ピン位置調整用レティクル",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -104,7 +104,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
-                          child: Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
+                          child: Text("ピン立てボタンを押すとこの中心にピンが立てられます。",
                             style: TextStyle(
                                 color: Colors.white
                             ),),
@@ -122,32 +122,6 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
             keyTarget: keySideMenu,
             contents: [
               ContentTarget(
-                  align: AlignContent.left,
-                  child: Container(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          "Multiples content",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontSize: 20.0
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10.0),
-                          child: Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
-                            style: TextStyle(
-                                color: Colors.white
-                            ),),
-                        )
-                      ],
-                    ),
-                  )
-              ),
-              ContentTarget(
                   align: AlignContent.top,
                   child: Container(
                     child: Column(
@@ -155,7 +129,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          "Multiples content",
+                          "メニュー",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -164,7 +138,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
-                          child: Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
+                          child: Text("サイドメニューを表示します。メニューからは領域データの保存と読み出し、子機と親機間の通信、移動履歴の確認、アプリケーションの設定を行うことができます。",
                             style: TextStyle(
                                 color: Colors.white
                             ),),
@@ -183,14 +157,14 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
             keyTarget: keyAlertToggle,
             contents: [
               ContentTarget(
-                  align: AlignContent.right,
+                  align: AlignContent.top,
                   child: Container(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          "Title lorem ipsum",
+                          "判定開始ボタン",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -199,7 +173,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
-                          child: Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
+                          child: Text("アラートのオンオフを切り替えます。この表示がオフになっている時は禁止領域に進入しても警報はなりませんが、履歴の保存は行われています。",
                             style: TextStyle(
                                 color: Colors.white
                             ),),
@@ -218,14 +192,14 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
             keyTarget: keySearchButton,
             contents: [
               ContentTarget(
-                  align: AlignContent.left,
+                  align: AlignContent.top,
                   child: Container(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          "Multiples content",
+                          "地名検索",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -234,7 +208,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
-                          child: Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
+                          child: Text("地名で検索を行うとその地点へ地図を移動します。",
                             style: TextStyle(
                                 color: Colors.white
                             ),),
@@ -243,32 +217,6 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                     ),
                   )
               ),
-              ContentTarget(
-                  align: AlignContent.top,
-                  child: Container(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          "Multiples content",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              fontSize: 20.0
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10.0),
-                          child: Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
-                            style: TextStyle(
-                                color: Colors.white
-                            ),),
-                        )
-                      ],
-                    ),
-                  )
-              )
             ]
         )
     );
@@ -279,14 +227,14 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
             keyTarget: keyCurrentPosition,
             contents: [
               ContentTarget(
-                  align: AlignContent.right,
+                  align: AlignContent.top,
                   child: Container(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          "Title lorem ipsum",
+                          "現在地取得ボタン",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
@@ -295,7 +243,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                         ),
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
-                          child: Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin pulvinar tortor eget maximus iaculis.",
+                          child: Text("現在地情報が更新された場合にその地点へ地図を移動します。",
                             style: TextStyle(
                                 color: Colors.white
                             ),),
@@ -350,7 +298,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
         colorShadow: Colors.red, // DEFAULT Colors.black
         // alignSkip: Alignment.bottomRight,
         // textSkip: "SKIP",
-        // paddingFocus: 10,
+        paddingFocus: 10,
         // opacityShadow: 0.8,
         finish: (){
           print("finish");
@@ -552,7 +500,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
               children: <Widget>[
 
                 Padding(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.only(left: 15),
                   child: IconButton(
                     key: keySideMenu,
                     icon: Icon(
