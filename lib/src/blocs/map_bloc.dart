@@ -157,6 +157,10 @@ class MapBloc extends Bloc {
   Sink<bool> get isSearching => _isSearchingContoller.sink;
   Stream<bool> get onIsSearchingChanged => _isSearchingContoller.stream;
 
+  final _firstLaunchDetectController = StreamController<bool>.broadcast();
+  Sink<bool> get firstLaunch => _firstLaunchDetectController.sink;
+  Stream<bool> get onFirstLaunchDetected => _firstLaunchDetectController.stream;
+
   void initMapOptions() {
     MapOptions _mapOptions = new MapOptions(
         center: new LatLng(35.691075, 139.767828),
@@ -1024,6 +1028,7 @@ class MapBloc extends Bloc {
     onAlertEnableChanged.listen((bool){
       this.isAlertEnable = bool;
     });
+
   }
 
   Future<void> searchAndMoveToPlace(String key) async {
@@ -1077,5 +1082,6 @@ class MapBloc extends Bloc {
     _calcLocationController.close();
     _selectPolygonController.close();
     _isSearchingContoller.close();
+    _firstLaunchDetectController.close();
   }
 }

@@ -7,6 +7,7 @@ import 'package:flutter_background_location/flutter_background_location.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
+import 'package:flutter_map_app/src/utilities/helper.dart';
 import 'package:flutter_map_app/src/utilities/logger.dart';
 import 'package:flutter_map_app/src/widgets/space_box.dart';
 import 'package:latlong/latlong.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'dart:math' as math;
 
 import 'package:seekbar/seekbar.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:vibration/vibration.dart';
 
 
@@ -29,6 +31,15 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
   AnimationController _controller;
   static const List<IconData> icons = const [Icons.clear,Icons.check];
 
+  List<TargetFocus> targets = List();
+  GlobalKey keyAddPinButton = GlobalKey();
+  GlobalKey keyTargetIcon = GlobalKey();
+  GlobalKey keySideMenu = GlobalKey();
+  GlobalKey keyAlertToggle = GlobalKey();
+  GlobalKey keySearchButton = GlobalKey();
+  GlobalKey keyCurrentPosition = GlobalKey();
+  TutorialCoachMark tutorial;
+
   @override
   void initState(){
     super.initState();
@@ -36,6 +47,214 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
     _controller = new AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 500),
+    );
+
+    targets.add(
+        TargetFocus(
+            identify: "Target 1",
+            keyTarget: keyAddPinButton,
+            contents: [
+              ContentTarget(
+                  align: AlignContent.top,
+                  child: Container(
+                    child:Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          "領域ピン立てボタン",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 20.0
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Text("禁止領域の頂点を追加します。頂点数が3つ以上になると確定が可能になります。",
+                            style: TextStyle(
+                                color: Colors.white
+                            ),),
+                        )
+                      ],
+                    ),
+                  )
+              )
+            ]
+        )
+    );
+    targets.add(
+        TargetFocus(
+            identify: "Target 2",
+            keyTarget: keyTargetIcon,
+            contents: [
+              ContentTarget(
+                  align: AlignContent.bottom,
+                  child: Container(
+                    child:Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          "ピン位置調整用レティクル",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 20.0
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Text("ピン立てボタンを押すとこの中心にピンが立てられます。",
+                            style: TextStyle(
+                                color: Colors.white
+                            ),),
+                        )
+                      ],
+                    ),
+                  )
+              )
+            ]
+        )
+    );
+    targets.add(
+        TargetFocus(
+            identify: "Target 3",
+            keyTarget: keySideMenu,
+            contents: [
+              ContentTarget(
+                  align: AlignContent.top,
+                  child: Container(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          "メニュー",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 20.0
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Text("サイドメニューを表示します。メニューからは領域データの保存と読み出し、子機と親機間の通信、移動履歴の確認、アプリケーションの設定を行うことができます。",
+                            style: TextStyle(
+                                color: Colors.white
+                            ),),
+                        )
+                      ],
+                    ),
+                  )
+              )
+            ]
+        )
+    );
+
+    targets.add(
+        TargetFocus(
+            identify: "Target 4",
+            keyTarget: keyAlertToggle,
+            contents: [
+              ContentTarget(
+                  align: AlignContent.top,
+                  child: Container(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          "判定開始ボタン",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 20.0
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Text("アラートのオンオフを切り替えます。この表示がオフになっている時は禁止領域に進入しても警報はなりませんが、履歴の保存は行われています。",
+                            style: TextStyle(
+                                color: Colors.white
+                            ),),
+                        )
+                      ],
+                    ),
+                  )
+              )
+            ]
+        )
+    );
+
+    targets.add(
+        TargetFocus(
+            identify: "Target 5",
+            keyTarget: keySearchButton,
+            contents: [
+              ContentTarget(
+                  align: AlignContent.top,
+                  child: Container(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          "地名検索",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 20.0
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Text("地名で検索を行うとその地点へ地図を移動します。",
+                            style: TextStyle(
+                                color: Colors.white
+                            ),),
+                        )
+                      ],
+                    ),
+                  )
+              ),
+            ]
+        )
+    );
+
+    targets.add(
+        TargetFocus(
+            identify: "Target 6",
+            keyTarget: keyCurrentPosition,
+            contents: [
+              ContentTarget(
+                  align: AlignContent.top,
+                  child: Container(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          "現在地取得ボタン",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontSize: 20.0
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Text("現在地情報が更新された場合にその地点へ地図を移動します。",
+                            style: TextStyle(
+                                color: Colors.white
+                            ),),
+                        )
+                      ],
+                    ),
+                  )
+              )
+            ]
+        )
     );
   }
 
@@ -48,7 +267,6 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
     blocMap.initLayers();
     blocMap.initMapOptions();
     blocMap.readSavedArea(Constants.DEFAULT_AREA_TABLE);
-
 
     blocMap.onSelectPolygon.listen((polygon){
       Vibration.hasVibrator().then((bool) {
@@ -73,6 +291,35 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
               ],
             );
           });
+    });
+
+    tutorial = TutorialCoachMark(
+        context,
+        targets: targets, // List<TargetFocus>
+        colorShadow: Colors.red, // DEFAULT Colors.black
+        // alignSkip: Alignment.bottomRight,
+        // textSkip: "SKIP",
+        paddingFocus: 10,
+        // opacityShadow: 0.8,
+        finish: (){
+          print("finish");
+        },
+        clickTarget: (target){
+          print(target);
+        },
+        clickSkip: (){
+          print("skip");
+        }
+    );
+
+    blocMap.onFirstLaunchDetected.listen((bool){
+      tutorial..show();
+    });
+
+    Helper().checkFirstSeen().then((bool){
+      if(bool){
+        blocMap.firstLaunch.add(true);
+      }
     });
 
     return Scaffold(
@@ -260,8 +507,9 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
               children: <Widget>[
 
                 Padding(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.only(left: 15),
                   child: IconButton(
+                    key: keySideMenu,
                     icon: Icon(
                       Icons.menu,
                       color: Colors.white,
@@ -275,6 +523,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                 Padding(
                   padding: const EdgeInsets.all(6),
                   child: IconButton(
+                    key: keyAlertToggle,
                     icon: StreamBuilder(
                     stream: blocMap.onAlertEnableChanged,
                     builder: (context,alertEnableSnapshot){
@@ -309,6 +558,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                 Padding(
                   padding: const EdgeInsets.all(6),
                   child: IconButton(
+                    key: keySearchButton,
                     icon: Icon(
                       Icons.search,
                       color: Colors.white,
@@ -394,6 +644,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                         )
                       ),
                       Center(
+                        key: keyCurrentPosition,
                         child:Icon(
                           Icons.location_searching,
                           color: Colors.white,
@@ -441,7 +692,15 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
               ),
             ),
 
-            Center(child: Icon(Icons.add_circle_outline,size: 40.0,),),
+            Center(
+              child: Container(
+                key: keyTargetIcon,
+                child: Icon(
+                  Icons.add_circle_outline,
+                  size: 40.0,
+                ),
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
@@ -578,6 +837,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                       margin: EdgeInsets.only(bottom: 16.0),
                       child: new FloatingActionButton(
                         backgroundColor: Colors.indigo,
+                        key: keyAddPinButton,
                         heroTag: "add",
                         child: new AnimatedBuilder(
                           animation: _controller,

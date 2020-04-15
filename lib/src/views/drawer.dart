@@ -191,6 +191,19 @@ class _MainDrawerState extends State<MainDrawer> {
               Navigator.pushNamed(context, '/setting-screen');
             },
           ),
+          Divider(),
+          FlatButton(
+            child: Row(children: [
+              SpaceBox(width: 16),
+              Icon(Icons.help_outline),
+              SpaceBox(width: 64),
+              Text("ヘルプ")
+            ]),
+            onPressed: () {
+              Navigator.of(context).pop();
+              blocMap.firstLaunch.add(true);
+            },
+          ),
         ],
       ),
     );
