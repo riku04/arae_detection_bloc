@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:latlong/latlong.dart';
 import 'dart:typed_data';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class Helper {
   static String stringJoiner(List<String> list, String delimiter) {
@@ -54,6 +56,17 @@ class Helper {
     final list = Uint64List.fromList([value]);
     final bytes = Uint8List.view(list.buffer);
     return bytes;
+  }
+
+  Future<bool> checkFirstSeen() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool _seen = (prefs.getBool('seen') ?? false);
+    if (_seen) {
+      return false;
+    } else {
+      prefs.setBool('seen', true);
+      return true;
+    }
   }
 
 }

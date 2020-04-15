@@ -46,6 +46,9 @@ dependencies:
   geocoder: ^0.2.1
   tutorial_coach_mark: ^0.3.0
 
+  shared_preferences: ^0.5.3
+
+
 
   flutter_ble_peripheral:
     path: ../flutter_ble_peripheral/

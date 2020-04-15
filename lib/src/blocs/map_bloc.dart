@@ -1028,6 +1028,7 @@ class MapBloc extends Bloc {
     onAlertEnableChanged.listen((bool){
       this.isAlertEnable = bool;
     });
+
   }
 
   Future<void> searchAndMoveToPlace(String key) async {

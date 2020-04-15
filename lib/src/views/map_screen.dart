@@ -7,6 +7,7 @@ import 'package:flutter_background_location/flutter_background_location.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_app/src/blocs/map_bloc.dart';
 import 'package:flutter_map_app/src/resources/constants.dart';
+import 'package:flutter_map_app/src/utilities/helper.dart';
 import 'package:flutter_map_app/src/utilities/logger.dart';
 import 'package:flutter_map_app/src/widgets/space_box.dart';
 import 'package:latlong/latlong.dart';
@@ -313,6 +314,12 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
 
     blocMap.onFirstLaunchDetected.listen((bool){
       tutorial..show();
+    });
+
+    Helper().checkFirstSeen().then((bool){
+      if(bool){
+        blocMap.firstLaunch.add(true);
+      }
     });
 
     return Scaffold(
@@ -646,7 +653,6 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin{
                     ],
                   ),
                   onPressed: () {
-                    blocMap.firstLaunch.add(true);
                     blocMap.calcLocation.add(true);
                     blocMap.onCurrentLocationChanged.listen((point){
                       if(blocMap.isCalcLocationEnable) {
