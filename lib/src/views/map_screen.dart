@@ -18,7 +18,6 @@ import 'package:seekbar/seekbar.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import 'package:vibration/vibration.dart';
 
-
 class MapScreen extends StatefulWidget {
   @override
   _MapScreenState createState() => _MapScreenState();

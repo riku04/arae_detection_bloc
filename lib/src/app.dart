@@ -14,7 +14,7 @@ import 'package:flutter_map_app/src/views/map_screen.dart';
 import 'package:flutter_map_app/src/views/read_area_screen.dart';
 import 'package:flutter_map_app/src/views/read_log_screen.dart';
 import 'package:flutter_map_app/src/views/setting_screen.dart';
-import 'package:flutter_map_app/src/views/splash_screen.dart';
+import 'package:flutter_map_app/src/views/splash_view.dart';
 
 class App extends StatelessWidget {
   @override
@@ -31,7 +31,7 @@ class App extends StatelessWidget {
           ),
         ),
         routes: <String, WidgetBuilder>{
-          '/splash-screen': (BuildContext context) => SplashScreen(),
+          '/splash-screen': (BuildContext context) => SplashView(),
           '/map-screen': (BuildContext context) => MapScreen(),
           '/read-area-screen': (BuildContext context) =>
               BlocProvider<ReadAreaBloc>(

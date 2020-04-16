@@ -45,8 +45,9 @@ dependencies:
   flutter_ringtone_player: ^2.0.0
   geocoder: ^0.2.1
   tutorial_coach_mark: ^0.3.0
-
   shared_preferences: ^0.5.3
+  splashscreen: ^1.2.0
+
 
 
 
@@ -68,7 +69,7 @@ flutter:
   assets:
    - sounds/pii.mp3
    - sounds/pupu.mp3
-   - assets/res/
+   - images/tori.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
