@@ -47,9 +47,7 @@ dependencies:
   tutorial_coach_mark: ^0.3.0
   shared_preferences: ^0.5.3
   splashscreen: ^1.2.0
-
-
-
+  flutter_launcher_icons: ^0.7.4
 
   flutter_ble_peripheral:
     path: ../flutter_ble_peripheral/
@@ -60,6 +58,12 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons:
+
+flutter_icons:
+  image_path: "images/tori.png"
+  android: true
+  ios: true
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
