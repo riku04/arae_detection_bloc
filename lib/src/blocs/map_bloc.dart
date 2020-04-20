@@ -87,7 +87,12 @@ class MapBloc extends Bloc {
   MapController _mapController;
 
   void setMapController(MapController mc){
-    this._mapController = mc;
+    if(mc!=null) {
+      this._mapController = mc;
+      Future.delayed(Duration(milliseconds: 500),(){
+        this._mapController.move(LatLng(35.6991372,139.7743244), 15);
+      });
+    }
   }
 
   final StreamController<MapOptions> _optionsController =

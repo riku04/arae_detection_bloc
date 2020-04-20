@@ -28,4 +28,8 @@ class Constants {
   static const int LOG_PLAY_SPEED_MINUS_1x = -1;
   static const int LOG_PLAY_SPEED_MINUS_2x = -2;
   static const int LOG_PLAY_SPEED_MINUS_4x = -4;
+
+  static const bool SHOW_SPLASH = true;
+  static const int SPLASH_TIME_IN_SEC = 3;
+
 }

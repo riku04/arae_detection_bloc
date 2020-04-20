@@ -123,6 +123,7 @@ class ReadLogBloc extends Bloc{
     String path = directory.path +"/"+ filename;
     Directory del = Directory(path);
     print(del.path);
+    print(del.existsSync());
     await del.delete(recursive: true);
     updateLogList();
     return;

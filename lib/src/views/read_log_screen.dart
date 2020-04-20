@@ -15,6 +15,9 @@ class ReadLogScreen extends StatefulWidget {
 }
 
 class _ReadLogScreenState extends State<ReadLogScreen> {
+
+  BuildContext context;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -26,6 +29,7 @@ class _ReadLogScreenState extends State<ReadLogScreen> {
     final blocMap = BlocProvider.of<MapBloc>(context);
     final readLogBloc = BlocProvider.of<ReadLogBloc>(context);
 
+    this.context = context;
     return SafeArea(
         child: Scaffold(
           appBar: AppBar(
@@ -134,7 +138,7 @@ class _ReadLogScreenState extends State<ReadLogScreen> {
                             onPressed: () {
                               showDialog(
                                 context: context,
-                                builder: (_) {
+                                builder: (context) {
                                   return AlertDialog(
                                     title: Text("履歴データ削除"),
                                     content:
@@ -143,14 +147,14 @@ class _ReadLogScreenState extends State<ReadLogScreen> {
                                       // ボタン領域
                                       FlatButton(
                                         child: Text("Cancel"),
-                                        onPressed: () => Navigator.pop(context),
+                                        onPressed: () => Navigator.of(context).pop(),
                                       ),
                                       FlatButton(
                                         child: Text("OK"),
                                         onPressed: () {
                                           print("delete pressed:" + logSnapshot.data[index][0]);
                                           readLogBloc.removeLogByName(logSnapshot.data[index][0]);
-                                          Navigator.pop(context);
+                                          Navigator.of(context).pop();
                                         },
                                       ),
                                     ],
